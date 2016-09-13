@@ -1,0 +1,56 @@
+# http://www.gnu.org/software/automake
+
+Makefile.in
+
+# http://www.gnu.org/software/autoconf
+
+/autom4te.cache
+/aclocal.m4
+/compile
+/stamp-h1
+/config.log
+/Makefile
+/.deps
+
+# netbeans project files
+
+/nbproject/
+
+
+# c / cpp staff
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.out
+*.app
+/.libs/libMoBaCommon.so.0.0.0
+/.libs/libMoBaCommon.so.0
+!/Makefile.in
+/libtool
+/config.h
+/config.status
+/configure.scan
+/autoscan.log
