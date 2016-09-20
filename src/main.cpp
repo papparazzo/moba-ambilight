@@ -1,8 +1,23 @@
 /*
- * File:   main.cpp
- * Author: stefan
+ *  Project:    moba-ambilight
  *
- * Created on August 5, 2016, 10:40 PM
+ *  Version:    1.0.0
+ *
+ *  Copyright (C) 2016 Stefan Paproth <pappi-@gmx.de>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.
+ *
  */
 
 #include <wiringPi.h>
@@ -17,17 +32,19 @@
 
 #include <moba/atomic.h>
 #include <moba/ipc.h>
+#include <moba/helper.h>
+#include <moba/log.h>
 
 const int PIN_OUT_R = 27;
 const int PIN_OUT_B = 24;
 const int PIN_OUT_W = 23;
 const int PIN[3] = {PIN_OUT_R, PIN_OUT_B, PIN_OUT_W};
 
-const int FACTOR = 50;
-const int RANGE  = 255;
+const int FACTOR = 5;
+const int RANGE  = 1000;
 
-Atomic<bool> running(true);
-Atomic<int> currRatio[3];
+moba::Atomic<bool> running(true);
+moba::Atomic<int> currRatio[3];
 
 void *triggerR_(void *) {
     while(running) {
@@ -75,7 +92,7 @@ void loop() {
     int target[4];
     int step[3];
 
-    IPC ipc(IPC::READING, "/tmp/fifo0001");
+    moba::IPC ipc(moba::IPC::READING, "/tmp/fifo0001");
     std::string data;
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
@@ -88,20 +105,25 @@ void loop() {
             pos = found + 1;
         }
         for(int i = 0; i < 3; ++i) {
-            step[i] = RANGE / (target[i] - currRatio[i]);
+            if(!(target[i] - currRatio[i])) {
+                step[i] = RANGE;
+            } else {
+                step[i] = RANGE / (target[i] - currRatio[i]);
+            }
         }
         for(int i = 0; i < RANGE; ++i) {
             delay(target[3]);
             for(int j = 0; j < 3; ++j) {
                 if(!(i % step[j])) {
-                    if(step[j] > 0) {
+                    if(step[j] > 0 && step[j] < RANGE) {
                         currRatio[j]++;
-                    } else {
+                    } else if(step[j] < RANGE) {
                         currRatio[j]--;
                     }
                 }
             }
         }
+        delayMicroseconds(RANGE * FACTOR * 2);
         for(int i = 0; i < 3; ++i) {
             if(target[i] == 0) {
                 currRatio[i] = 0;
@@ -120,7 +142,7 @@ int main(int argc, char** argv) {
     struct sched_param param;
     param.sched_priority = 79;
     if(sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
-        std::cout << errno << std::endl;
+        LOG(moba::ERROR) << moba::getErrno("sched_setscheduler failed") << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -142,11 +164,14 @@ int main(int argc, char** argv) {
     pthread_create(&thW, NULL, triggerW_, NULL);
     pthread_detach(thW);
 
-    while(true) {
-        try {
-            loop();
-        } catch(...) {
-            // --#--
-        }
+    try {
+        loop();
+    } catch(std::exception &e) {
+        LOG(moba::WARNING) << e.what() << std::endl;
     }
+
+    for(int i = 0; i < 3; ++i) {
+        digitalWrite(PIN[i], LOW);
+    }
+
 }
