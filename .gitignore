@@ -52,5 +52,6 @@ Makefile.in
 /libtool
 /config.h
 /config.status
+/moba-ambilight
 /configure.scan
 /autoscan.log
