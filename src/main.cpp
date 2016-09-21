@@ -40,8 +40,11 @@ const int PIN_OUT_B = 24;
 const int PIN_OUT_W = 23;
 const int PIN[3] = {PIN_OUT_R, PIN_OUT_B, PIN_OUT_W};
 
-const int FACTOR = 5;
-const int RANGE  = 1000;
+const int DEF_FACTOR = 5;
+const int DEF_RANGE  = 1000;
+
+int FACTOR = DEF_FACTOR;
+int RANGE  = DEF_RANGE;
 
 moba::Atomic<bool> running(true);
 moba::Atomic<int> currRatio[3];
@@ -88,11 +91,11 @@ void *triggerW_(void *) {
     }
 }
 
-void loop() {
+void loop(const std::string &fifo) {
     int target[4];
     int step[3];
 
-    moba::IPC ipc(moba::IPC::READING, "/tmp/fifo0001");
+    moba::IPC ipc(moba::IPC::READING, fifo);
     std::string data;
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
@@ -137,6 +140,22 @@ void loop() {
 }
 
 int main(int argc, char** argv) {
+    std::string fifo = "/tmp/fifo0001";
+
+    switch(argc) {
+        case 4:
+            fifo = std::string(argv[3]);
+
+        case 3:
+            RANGE = atoi(argv[2]);
+
+        case 2:
+            FACTOR = atoi(argv[1]);
+
+        default:
+            break;
+    }
+
     setpriority(PRIO_PROCESS, 0, -20);
 
     struct sched_param param;
@@ -165,7 +184,7 @@ int main(int argc, char** argv) {
     pthread_detach(thW);
 
     try {
-        loop();
+        loop(fifo);
     } catch(std::exception &e) {
         LOG(moba::WARNING) << e.what() << std::endl;
     }
@@ -173,5 +192,4 @@ int main(int argc, char** argv) {
     for(int i = 0; i < 3; ++i) {
         digitalWrite(PIN[i], LOW);
     }
-
 }
