@@ -42,9 +42,11 @@ const int PIN[3] = {PIN_OUT_R, PIN_OUT_B, PIN_OUT_W};
 
 const int DEF_FACTOR = 5;
 const int DEF_RANGE  = 1000;
+const int DEF_STEPS  = DEF_RANGE * 10;
 
 int FACTOR = DEF_FACTOR;
 int RANGE  = DEF_RANGE;
+int STEPS  = DEF_STEPS;
 
 moba::Atomic<bool> running(true);
 moba::Atomic<int> currRatio[3];
@@ -52,7 +54,7 @@ moba::Atomic<int> currRatio[3];
 void *triggerR_(void *) {
     while(running) {
         if(currRatio[0] == RANGE || currRatio[0] == 0) {
-            delay(RANGE);
+            delayMicroseconds(RANGE * FACTOR);
             continue;
         }
 
@@ -66,7 +68,7 @@ void *triggerR_(void *) {
 void *triggerB_(void *) {
     while(running) {
         if(currRatio[1] == RANGE || currRatio[1] == 0) {
-            delay(RANGE);
+            delayMicroseconds(RANGE * FACTOR);
             continue;
         }
 
@@ -80,7 +82,7 @@ void *triggerB_(void *) {
 void *triggerW_(void *) {
     while(running) {
         if(currRatio[2] == RANGE || currRatio[2] == 0) {
-            delay(RANGE);
+            delayMicroseconds(RANGE * FACTOR);
             continue;
         }
 
@@ -88,6 +90,17 @@ void *triggerW_(void *) {
         digitalWrite(PIN[2], HIGH);
         delayMicroseconds(currRatio[2] * FACTOR);
         digitalWrite(PIN[2], LOW);
+    }
+}
+
+void test() {
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            delay(500);
+            digitalWrite(PIN[i], HIGH);
+            delay(500);
+            digitalWrite(PIN[i], LOW);
+        }
     }
 }
 
@@ -108,32 +121,38 @@ void loop(const std::string &fifo) {
             pos = found + 1;
         }
         for(int i = 0; i < 3; ++i) {
-            if(!(target[i] - currRatio[i])) {
-                step[i] = RANGE;
+            if(target[i] - currRatio[i]) {
+                step[i] = STEPS / (target[i] - currRatio[i]);
             } else {
-                step[i] = RANGE / (target[i] - currRatio[i]);
+                step[i] = STEPS + 1;
             }
         }
-        for(int i = 0; i < RANGE; ++i) {
+        for(int i = 1; i <= STEPS; ++i) {
             delay(target[3]);
             for(int j = 0; j < 3; ++j) {
-                if(!(i % step[j])) {
-                    if(step[j] > 0 && step[j] < RANGE) {
-                        currRatio[j]++;
-                    } else if(step[j] < RANGE) {
-                        currRatio[j]--;
-                    }
+                if(i % step[j]) {
+                    continue;
                 }
-            }
-        }
-        delayMicroseconds(RANGE * FACTOR * 2);
-        for(int i = 0; i < 3; ++i) {
-            if(target[i] == 0) {
-                currRatio[i] = 0;
-                digitalWrite(PIN[i], LOW);
-            } else if(target[i] == RANGE) {
-                currRatio[i] = RANGE;
-                digitalWrite(PIN[i], HIGH);
+                if(step[j] > 0 && currRatio[j] == RANGE) {
+                    continue;
+                }
+                if(step[j] > 0 ) {
+                    currRatio[j]++;
+                }
+                if(step[j] > 0 && currRatio[j] == RANGE) {
+                    digitalWrite(PIN[j], HIGH);
+                    continue;
+                }
+                if(step[j] < 0 && currRatio[j] == 0) {
+                    continue;
+                }
+                if(step[j] < 0) {
+                    currRatio[j]--;
+                }
+                if(step[j] < 0 && currRatio[j] == 0) {
+                    digitalWrite(PIN[j], LOW);
+                    continue;
+                }
             }
         }
     }
@@ -156,11 +175,9 @@ int main(int argc, char** argv) {
             break;
     }
 
-    setpriority(PRIO_PROCESS, 0, -20);
-
     struct sched_param param;
     param.sched_priority = 79;
-    if(sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
+    if(sched_setscheduler(0, SCHED_RR, &param) != 0) {
         LOG(moba::ERROR) << moba::getErrno("sched_setscheduler failed") << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -171,6 +188,8 @@ int main(int argc, char** argv) {
         pinMode(PIN[i], OUTPUT);
     }
 
+//test();
+//return 0;
     pthread_t thR;
     pthread_create(&thR, NULL, triggerR_, NULL);
     pthread_detach(thR);
