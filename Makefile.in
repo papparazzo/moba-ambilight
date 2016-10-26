@@ -66,7 +66,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_moba_ambilight_OBJECTS = main.$(OBJEXT)
+am_moba_ambilight_OBJECTS = main.$(OBJEXT) bridge.$(OBJEXT) \
+	handler.$(OBJEXT)
 moba_ambilight_OBJECTS = $(am_moba_ambilight_OBJECTS)
 moba_ambilight_DEPENDENCIES = /usr/local/lib/libMoBaCommon.a
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -192,7 +193,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-moba_ambilight_SOURCES = src/main.cpp 
+moba_ambilight_SOURCES = src/main.cpp src/bridge.cpp src/handler.cpp
 moba_ambilight_LDADD = -lwiringPi /usr/local/lib/libMoBaCommon.a
 ACLOCAL_AMFLAGS = -I m4
 all: config.h
@@ -299,6 +300,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bridge.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .cpp.o:
@@ -328,6 +331,34 @@ main.obj: src/main.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/main.cpp' object='main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main.obj `if test -f 'src/main.cpp'; then $(CYGPATH_W) 'src/main.cpp'; else $(CYGPATH_W) '$(srcdir)/src/main.cpp'; fi`
+
+bridge.o: src/bridge.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT bridge.o -MD -MP -MF $(DEPDIR)/bridge.Tpo -c -o bridge.o `test -f 'src/bridge.cpp' || echo '$(srcdir)/'`src/bridge.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/bridge.Tpo $(DEPDIR)/bridge.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/bridge.cpp' object='bridge.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o bridge.o `test -f 'src/bridge.cpp' || echo '$(srcdir)/'`src/bridge.cpp
+
+bridge.obj: src/bridge.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT bridge.obj -MD -MP -MF $(DEPDIR)/bridge.Tpo -c -o bridge.obj `if test -f 'src/bridge.cpp'; then $(CYGPATH_W) 'src/bridge.cpp'; else $(CYGPATH_W) '$(srcdir)/src/bridge.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/bridge.Tpo $(DEPDIR)/bridge.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/bridge.cpp' object='bridge.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o bridge.obj `if test -f 'src/bridge.cpp'; then $(CYGPATH_W) 'src/bridge.cpp'; else $(CYGPATH_W) '$(srcdir)/src/bridge.cpp'; fi`
+
+handler.o: src/handler.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT handler.o -MD -MP -MF $(DEPDIR)/handler.Tpo -c -o handler.o `test -f 'src/handler.cpp' || echo '$(srcdir)/'`src/handler.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/handler.Tpo $(DEPDIR)/handler.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/handler.cpp' object='handler.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o handler.o `test -f 'src/handler.cpp' || echo '$(srcdir)/'`src/handler.cpp
+
+handler.obj: src/handler.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT handler.obj -MD -MP -MF $(DEPDIR)/handler.Tpo -c -o handler.obj `if test -f 'src/handler.cpp'; then $(CYGPATH_W) 'src/handler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/handler.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/handler.Tpo $(DEPDIR)/handler.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/handler.cpp' object='handler.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o handler.obj `if test -f 'src/handler.cpp'; then $(CYGPATH_W) 'src/handler.cpp'; else $(CYGPATH_W) '$(srcdir)/src/handler.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
