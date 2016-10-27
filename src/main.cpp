@@ -51,13 +51,13 @@ int main(int argc, char** argv) {
 
     boost::shared_ptr<Bridge> bridge(new Bridge());
     boost::shared_ptr<moba::IPC> ipc(new moba::IPC(moba::IPC::READING, fifo));
-    boost::shared_ptr<moba::SignalHandler> sigEmergStop(new moba::SignalHandler(SIGUSR1));
-    boost::shared_ptr<moba::SignalHandler> sigEmergGo(new moba::SignalHandler(SIGUSR2));
+    boost::shared_ptr<moba::SignalHandler> sigEmergency(new moba::SignalHandler(SIGUSR1));
+    boost::shared_ptr<moba::SignalHandler> sigContinue(new moba::SignalHandler(SIGUSR2));
 
     LOG(moba::DEBUG) << "Setting PWM frequency to " << freq << " Hz" << std::endl;
     bridge->setPWMFrequency(freq);
 
-    Handler handler(bridge, ipc, sigEmergStop, sigEmergGo);
+    Handler handler(bridge, ipc, sigEmergency, sigContinue);
 
     if(mode == "off") {
         bridge->setAllOff();

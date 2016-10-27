@@ -35,8 +35,8 @@ class Handler : private boost::noncopyable {
         Handler(
             boost::shared_ptr<Bridge> bridge,
             boost::shared_ptr<moba::IPC> ipc,
-            boost::shared_ptr<moba::SignalHandler> sigEmergStop,
-            boost::shared_ptr<moba::SignalHandler> sigEmergGo
+            boost::shared_ptr<moba::SignalHandler> sigEmergency,
+            boost::shared_ptr<moba::SignalHandler> sigContinue
         );
 
         void run();
@@ -45,8 +45,8 @@ class Handler : private boost::noncopyable {
     protected:
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
-        boost::shared_ptr<moba::SignalHandler> sigEmergStop;
-        boost::shared_ptr<moba::SignalHandler> sigEmergGo;
+        boost::shared_ptr<moba::SignalHandler> sigEmergency;
+        boost::shared_ptr<moba::SignalHandler> sigContinue;
 
         void emergency();
         void emergencyOn();

@@ -34,13 +34,13 @@ const Bridge::BankColor Handler::bcolor[] = {
 Handler::Handler(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
-    boost::shared_ptr<moba::SignalHandler> sigEmergStop,
-    boost::shared_ptr<moba::SignalHandler> sigEmergGo
+    boost::shared_ptr<moba::SignalHandler> sigEmergency,
+    boost::shared_ptr<moba::SignalHandler> sigContinue
 ) {
     this->bridge = bridge;
     this->ipc = ipc;
-    this->sigEmergGo = sigEmergGo;
-    this->sigEmergStop = sigEmergStop;
+    this->sigEmergency = sigEmergency;
+    this->sigContinue = sigContinue;
     for(int i = 0; i < 4; ++i) {
         this->currRatio[i] = 0;
     }
@@ -63,10 +63,9 @@ void Handler::emergencyOff() {
 
 void Handler::emergency() {
     this->emergencyOn();
-    while(!this->sigEmergGo->hasSignalTriggered()) {
+    while(!this->sigEmergency->hasSignalTriggered()) {
         usleep(50000);
     }
-    this->sigEmergGo->resetSignalState();
     this->emergencyOff();
 }
 
@@ -128,9 +127,12 @@ void Handler::run() {
         }
 
         for(int i = 1; i <= Handler::STEPS; ++i) {
-            if(this->sigEmergStop->hasSignalTriggered()) {
-                this->sigEmergStop->resetSignalState();
+            if(this->sigEmergency->hasSignalTriggered()) {
                 this->emergency();
+            }
+            if(this->sigContinue->hasSignalTriggered()) {
+                LOG(moba::DEBUG) << "continue-signal triggered" << std::endl;
+                break;
             }
 
             delayMicroseconds(target[4] * 10);
