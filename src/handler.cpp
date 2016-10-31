@@ -23,6 +23,7 @@
 #include "handler.h"
 #include <moba/log.h>
 #include <wiringPi.h>
+#include <string.h>
 
 const Bridge::BankColor Handler::bcolor[] = {
     Bridge::BLUE,
@@ -34,13 +35,11 @@ const Bridge::BankColor Handler::bcolor[] = {
 Handler::Handler(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
-    boost::shared_ptr<moba::SignalHandler> sigEmergency,
-    boost::shared_ptr<moba::SignalHandler> sigContinue
+    boost::shared_ptr<moba::SignalHandler> sigTerm
 ) {
     this->bridge = bridge;
     this->ipc = ipc;
-    this->sigEmergency = sigEmergency;
-    this->sigContinue = sigContinue;
+    this->sigTerm = sigTerm;
     for(int i = 0; i < 4; ++i) {
         this->currRatio[i] = 0;
     }
@@ -63,7 +62,7 @@ void Handler::emergencyOff() {
 
 void Handler::emergency() {
     this->emergencyOn();
-    while(!this->sigEmergency->hasSignalTriggered()) {
+    while(!this->ipc->receive(moba::IPC::EMERGENCY_RELEASE)) {
         usleep(50000);
     }
     this->emergencyOff();
@@ -92,17 +91,52 @@ void Handler::test() {
     LOG(moba::DEBUG) << "testing... finished!" << std::endl;
 }
 
+std::string Handler::getNextOrder() {
+    moba::IPC::Message msg;
+
+    while(true) {
+/* FIXME
+#        if(this->sigTerm->hasSignalTriggered()) {
+#            return;
+#        }
+ */
+
+        if(!this->ipc->receive(msg)) {
+            usleep(50000);
+            continue;
+        }
+
+        switch(msg.mtype) {
+            case moba::IPC::EMERGENCY_STOP:
+                this->emergency();
+                break;
+
+            case moba::IPC::TEST:
+                this->test();
+                break;
+
+            case moba::IPC::RUN:
+                return std::string(msg.mtext);
+
+            default:
+                break;
+        }
+    }
+}
+
 void Handler::run() {
     int target[5];
     int step[4];
     long ctr = 0;
 
-    std::string data;
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
+    moba::IPC::Message msg;
+
     while(true) {
-        this->ipc->readLine(data);
+        std::string data = this->getNextOrder();
+
         for(int i = 0; i < 5; ++i) {
             found = data.find(';', pos);
             target[i] = atoi(data.substr(pos, found - pos).c_str());
@@ -127,14 +161,6 @@ void Handler::run() {
         }
 
         for(int i = 1; i <= Handler::STEPS; ++i) {
-            if(this->sigEmergency->hasSignalTriggered()) {
-                this->emergency();
-            }
-            if(this->sigContinue->hasSignalTriggered()) {
-                LOG(moba::DEBUG) << "continue-signal triggered" << std::endl;
-                break;
-            }
-
             delayMicroseconds(target[4] * 10);
             for(int j = 0; j < 4; ++j) {
                 if(!step[j] || i % step[j]) {
@@ -147,6 +173,27 @@ void Handler::run() {
                     this->currRatio[j]--;
                 }
                 this->bridge->setPWM(Handler::bcolor[j], 0, this->currRatio[j]);
+            }
+
+            if(this->sigTerm->hasSignalTriggered()) {
+                return;
+            }
+
+            if(!this->ipc->receive(msg, moba::IPC::RUN, true)) {
+                continue;
+            }
+
+            switch(msg.mtype) {
+                case moba::IPC::EMERGENCY_STOP:
+                    this->emergency();
+                    break;
+
+                case moba::IPC::TEST:
+                    this->test();
+                    break;
+
+                default:
+                    break;
             }
         }
         LOG(moba::DEBUG) << "iteration finished" << std::endl;

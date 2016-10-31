@@ -25,6 +25,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <string>
+
 #include "bridge.h"
 
 #include <moba/ipc.h>
@@ -35,8 +37,7 @@ class Handler : private boost::noncopyable {
         Handler(
             boost::shared_ptr<Bridge> bridge,
             boost::shared_ptr<moba::IPC> ipc,
-            boost::shared_ptr<moba::SignalHandler> sigEmergency,
-            boost::shared_ptr<moba::SignalHandler> sigContinue
+            boost::shared_ptr<moba::SignalHandler> sigTerm
         );
 
         void run();
@@ -45,12 +46,13 @@ class Handler : private boost::noncopyable {
     protected:
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
-        boost::shared_ptr<moba::SignalHandler> sigEmergency;
-        boost::shared_ptr<moba::SignalHandler> sigContinue;
+        boost::shared_ptr<moba::SignalHandler> sigTerm;
 
         void emergency();
         void emergencyOn();
         void emergencyOff();
+
+        std::string getNextOrder();
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;

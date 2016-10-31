@@ -31,42 +31,30 @@
 #include <moba/signalhandler.h>
 
 int main(int argc, char** argv) {
-    std::string fifo = "/tmp/fifo0001";
     int freq = 120;
-    std::string mode = "auto";
+    int key = 123133;
 
     switch(argc) {
-        case 4:
-            freq = atoi(argv[3]);
-
         case 3:
-            fifo = std::string(argv[2]);
+            freq = atoi(argv[2]);
 
         case 2:
-            mode = std::string(argv[1]);;
+            key = atoi(argv[1]);
 
         default:
             break;
     }
 
-    boost::shared_ptr<Bridge> bridge(new Bridge());
-    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(moba::IPC::READING, fifo));
-    boost::shared_ptr<moba::SignalHandler> sigEmergency(new moba::SignalHandler(SIGUSR1));
-    boost::shared_ptr<moba::SignalHandler> sigContinue(new moba::SignalHandler(SIGUSR2));
+    LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
+    LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
 
-    LOG(moba::DEBUG) << "Setting PWM frequency to " << freq << " Hz" << std::endl;
+    boost::shared_ptr<Bridge> bridge(new Bridge());
+    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::SERVER));
+    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler(SIGTERM));
+
     bridge->setPWMFrequency(freq);
 
-    Handler handler(bridge, ipc, sigEmergency, sigContinue);
-
-    if(mode == "off") {
-        bridge->setAllOff();
-        return EXIT_SUCCESS;
-    }
-    if(mode == "test") {
-        handler.test();
-        return EXIT_SUCCESS;
-    }
+    Handler handler(bridge, ipc, sigTerm);
 
     try {
         handler.run();
