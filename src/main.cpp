@@ -32,7 +32,7 @@
 
 int main(int argc, char** argv) {
     int freq = 120;
-    int key = 123133;
+    int key = moba::IPC::DEFAULT_KEY;
 
     switch(argc) {
         case 3:
