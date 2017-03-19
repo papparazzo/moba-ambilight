@@ -26,11 +26,32 @@
 #include <boost/shared_ptr.hpp>
 
 #include <string>
+#include <exception>
 
 #include "bridge.h"
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
+#include <moba/ringbuffer.h>
+
+class HandlerException : public std::exception {
+
+    public:
+        virtual ~HandlerException() throw() {
+
+        }
+
+        HandlerException(const std::string &what) {
+            this->what__ = what;
+        }
+
+        virtual const char* what() const throw() {
+            return this->what__.c_str();
+        }
+
+    private:
+        std::string what__;
+};
 
 class Handler : private boost::noncopyable {
     public:
@@ -41,18 +62,23 @@ class Handler : private boost::noncopyable {
         );
 
         void run();
-        void test();
 
     protected:
+        struct TargetValues {
+            int targetIntensity[4];
+            int duration;
+        };
+
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
+        void test();
         void emergency();
-        void emergencyOn();
-        void emergencyOff();
+        void resume();
 
-        std::string getNextOrder();
+        bool fetchNextMsg();
+        TargetValues parseMessageData(const std::string &data);
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;
@@ -60,4 +86,6 @@ class Handler : private boost::noncopyable {
         int currRatio[4];
 
         const static Bridge::BankColor bcolor[];
+
+        moba::Ringbuffer<TargetValues> buffer;
 };
