@@ -45,76 +45,21 @@ namespace {
     };
 }
 
-int main(int argc, char** argv) {
-
-
-
-
-    int freq = 120;
-    int key = moba::IPC::DEFAULT_KEY;
-    std::string data;
-
-    switch(argc) {
-        case 3:
-            data = std::string(argv[2]);
-
-        case 2:
-            key = atoi(argv[1]);
-
-        default:
-            break;
-    }
-
-
-    LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
-    LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
-
-    boost::shared_ptr<Bridge> bridge(new Bridge());
-    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
-    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler(SIGTERM));
-
-    bridge->setPWMFrequency(freq);
-
-    Handler handler(bridge, ipc, sigTerm);
-
-    try {
-        handler.run();
-    } catch(std::exception &e) {
-        LOG(moba::WARNING) << e.what() << std::endl;
-    }
-    bridge->setAllOff();
-    return EXIT_SUCCESS;
-}
-
-
-
-
-/*
-
 void printHelp() {
-
+    std::cout << std::endl;
+    std::cout << "-k, --key       ipc communication-key" << std::endl;
+    std::cout << "-f, --frequency [server-mode] " << std::endl;
+    std::cout << "-d, --data      [client-mode] [blue];[red];[green];[white];[duration]" << std::endl;
+    std::cout << "-a, --action    [client-mode] [EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [HALT] | [CONTINUE] | [RESET] | [TERMINATE]" << std::endl;
+    std::cout << "-h, --help      shows this help" << std::endl;
+    std::cout << "-v, --version   shows version-info" << std::endl;
 }
 
-void sendData() {
-    if(data != "") {
-        moba::IPC ipc(key, moba::IPC::TYPE_CLIENT);
-
-        ipc.send(data, moba::IPC::CMD_RUN);
-        ipc.send("0;0;0;0;1", moba::IPC::CMD_RUN);
-        return EXIT_SUCCESS;
-    }
-}
-* /
-
-void parseParams(int argc, char **argv, int &freq, int &key) {
-
-}
-
-int main (int argc, char **argv) {
-
-    int freq = 120;
-    int key = moba::IPC::DEFAULT_KEY;
-    std::string data;
+int main(int argc, char** argv) {
+    int freq                  = 120;
+    int key                   = moba::IPC::DEFAULT_KEY;
+    moba::IPC::Command action = moba::IPC::CMD_RUN;
+    std::string data          = "";
 
     static struct option longOptions[] = {
         {"key",       required_argument, 0, 'k'},
@@ -136,30 +81,51 @@ int main (int argc, char **argv) {
 
         switch (c) {
             case 'k':
-                LOG(moba::DEBUG) << "k " << optarg << std::endl;
+                key = atoi(optarg);
                 break;
 
             case 'f':
-                LOG(moba::DEBUG) << "f " << optarg << std::endl;
+                freq = atoi(optarg);
                 break;
 
             case 'd':
-                LOG(moba::DEBUG) << "d " << optarg << std::endl;
+                data = std::string(optarg);
                 break;
 
             case 'a':
-                LOG(moba::DEBUG) << "a " << optarg << std::endl;
+                action = moba::IPC::getCMDFromString(optarg);
                 break;
 
             case 'h':
-                LOG(moba::DEBUG) << "h " << optarg << std::endl;
-                break;
+                printHelp();
+                return EXIT_SUCCESS;
 
             case 'v':
                 moba::printAppData(appData);
-                break;
+                return EXIT_SUCCESS;
         }
     }
-    exit (0);
+
+    if(action != moba::IPC::CMD_RUN || data != "") {
+        moba::IPC ipc(key, moba::IPC::TYPE_CLIENT);
+        ipc.send(data, action);
+        return EXIT_SUCCESS;
+    }
+    LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
+    LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
+
+    boost::shared_ptr<Bridge> bridge(new Bridge());
+    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
+    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler(SIGTERM));
+
+    bridge->setPWMFrequency(freq);
+    Handler handler(bridge, ipc, sigTerm);
+
+    try {
+        handler.run();
+    } catch(std::exception &e) {
+        LOG(moba::WARNING) << e.what() << std::endl;
+    }
+    bridge->setAllOff();
+    return EXIT_SUCCESS;
 }
- //* */
