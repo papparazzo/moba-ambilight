@@ -127,7 +127,7 @@ void Handler::run() {
                 break;
             }
         }
-        LOG(moba::DEBUG) << "iteration finished" << std::endl;
+        LOG(moba::DEBUG) << "<-- iteration #" << target.counter << " finished..." << std::endl;
     }
 }
 
@@ -233,6 +233,7 @@ bool Handler::fetchNextMsg() {
 }
 
 Handler::TargetValues Handler::parseMessageData(const std::string &data) {
+    static int counter = 0;
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
@@ -247,9 +248,13 @@ Handler::TargetValues Handler::parseMessageData(const std::string &data) {
         }
         pos = found + 1;
     }
-    LOG(moba::DEBUG) << ": " << (int)(Handler::STEPS * target.duration * 0.01) << " seconds" << std::endl;
+    target.counter = counter++;
+    LOG(moba::DEBUG) << "--> " << "inserting #" << counter << "..." << std::endl;
+    LOG(moba::DEBUG) << 
+            "--> duration: " << (int)(Handler::STEPS * target.duration * 0.01) << 
+            " seconds (~" << (int)(Handler::STEPS * target.duration * 0.01 / 60) << " min.)" << std::endl;
     LOG(moba::DEBUG) <<
-            "targets" <<
+            "--> targets" <<
             " blue: " << target.targetIntensity[0] <<
             " green: " << target.targetIntensity[1] <<
             " red: " << target.targetIntensity[2] <<

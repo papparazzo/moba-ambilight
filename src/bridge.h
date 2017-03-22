@@ -53,9 +53,9 @@ class Bridge : private boost::noncopyable {
 
         enum BankColor {
             WHITE = 0,
-            BLUE  = 1,
+            GREEN = 1,
             RED   = 2,
-            GREEN = 3
+            BLUE  = 3
         };
 
         Bridge(int address = 0x40);

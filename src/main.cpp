@@ -126,6 +126,7 @@ int main(int argc, char** argv) {
     } catch(std::exception &e) {
         LOG(moba::WARNING) << e.what() << std::endl;
     }
+
     bridge->setAllOff();
     return EXIT_SUCCESS;
 }

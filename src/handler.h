@@ -67,6 +67,7 @@ class Handler : private boost::noncopyable {
         struct TargetValues {
             int targetIntensity[4];
             int duration;
+            unsigned int counter;
         };
 
         boost::shared_ptr<Bridge> bridge;
