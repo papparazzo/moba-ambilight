@@ -109,7 +109,7 @@ void Handler::run() {
         }
 
         for(int i = 1; i <= Handler::STEPS; ++i) {
-            delayMicroseconds(target.duration * 10);
+            delayMicroseconds(target.duration);
             for(int j = 0; j < 4; ++j) {
                 if(!step[j] || i % step[j]) {
                     continue;
@@ -137,7 +137,7 @@ bool Handler::fetchNextMsg() {
     bool halted    = false;
 
     while(true) {
-        if(this->sigTerm->hasSignalTriggered()) {
+        if(this->sigTerm->hasAnySignalTriggered()) {
             throw HandlerException("sigterm catched");
         }
 
@@ -238,26 +238,36 @@ Handler::TargetValues Handler::parseMessageData(const std::string &data) {
     std::string::size_type found = 0;
 
     TargetValues target;
+    int val;
 
     for(int i = 0; i < 5; ++i) {
         found = data.find(';', pos);
         if(i < 4) {
-            target.targetIntensity[i] = static_cast<unsigned char>(atoi(data.substr(pos, found - pos).c_str()));
+            val = atoi(data.substr(pos, found - pos).c_str());
+            if(val < 0) {
+                val = 0;
+            }
+            if(val > 4095) {
+                val = 4095;
+            }
+            target.targetIntensity[i] = val;
         } else {
             target.duration = atoi(data.substr(pos, found - pos).c_str());
         }
         pos = found + 1;
     }
     target.counter = counter++;
-    LOG(moba::DEBUG) << "--> " << "inserting #" << counter << "..." << std::endl;
-    LOG(moba::DEBUG) << 
-            "--> duration: " << (int)(Handler::STEPS * target.duration * 0.01) << 
-            " seconds (~" << (int)(Handler::STEPS * target.duration * 0.01 / 60) << " min.)" << std::endl;
+    LOG(moba::DEBUG) << "--> " << "inserting #" << target.counter << "..." << std::endl;
+
+    LOG(moba::DEBUG) <<
+            "--> duration: ~" << target.duration <<
+            " sec. (~" << (int)(target.duration / 60) << " min.)" << std::endl;
     LOG(moba::DEBUG) <<
             "--> targets" <<
             " blue: " << target.targetIntensity[0] <<
             " green: " << target.targetIntensity[1] <<
             " red: " << target.targetIntensity[2] <<
             " white: " << target.targetIntensity[3] << std::endl;
+    target.duration = static_cast<int>((target.duration * 1000 * 1000) / Handler::STEPS);
     return target;
 }

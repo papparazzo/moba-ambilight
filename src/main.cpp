@@ -114,9 +114,13 @@ int main(int argc, char** argv) {
     LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
     LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
 
+    moba::setCoreFileSizeToULimit();
+
     boost::shared_ptr<Bridge> bridge(new Bridge());
     boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
-    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler(SIGTERM));
+    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler());
+    sigTerm->observeSignal(SIGTERM);
+    sigTerm->observeSignal(SIGINT);
 
     bridge->setPWMFrequency(freq);
     Handler handler(bridge, ipc, sigTerm);

@@ -67,7 +67,8 @@ class Bridge : private boost::noncopyable {
         void setOn(BankColor color);
         void setOff(BankColor color);
         void setPWM(BankColor color, int on, int off);
-        void setPWMlg(BankColor color, unsigned char val);
+        void setPWMlg(BankColor color, int val);
+        void setPWMlg(BankColor color, int bank, int val);
         void setData(BankColor color, int bank, int on, int off) ;
         void setAllOff();
 
@@ -101,4 +102,3 @@ class Bridge : private boost::noncopyable {
 
     private:
 };
-
