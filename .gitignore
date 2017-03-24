@@ -63,6 +63,7 @@ Makefile.in
 /libtool
 /config.status
 /moba-ambilight
+/core
 /configure.scan
 /autoscan.log
 /src/.deps/
