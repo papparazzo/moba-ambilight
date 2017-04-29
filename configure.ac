@@ -3,8 +3,8 @@
 
 AC_PREREQ([2.69])
 AC_INIT([MoBa-AmbiLight], [0.1], [pappi-@gmx.de])
-AM_INIT_AUTOMAKE([foreign]) 
-AC_CONFIG_SRCDIR([src/main.cpp])
+AM_INIT_AUTOMAKE([foreign])
+AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -23,5 +23,8 @@ AC_CHECK_HEADER_STDBOOL
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([
+    Makefile
+    src/Makefile
+])
 AC_OUTPUT

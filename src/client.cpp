@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <boost/shared_ptr.hpp>
 #include <getopt.h>
+#include <exception>
 
 #include "bridge.h"
 #include "handler.h"
@@ -33,6 +34,7 @@
 #include <moba/log.h>
 #include <moba/helper.h>
 #include <moba/signalhandler.h>
+#include <stdlib.h>
 
 namespace {
     moba::AppData appData = {
@@ -43,27 +45,46 @@ namespace {
         "",
         0
     };
+
+    struct CmdLineArguments {
+        int key;
+        moba::IPC::Command action;
+        std::string data;
+    };
 }
+
+class ParseCmdLineException : public std::exception {
+
+    public:
+        explicit ParseCmdLineException(const std::string &err) throw() : what_(err) {
+        }
+
+        ParseCmdLineException() throw() : what_("Unknown error") {
+        }
+
+        virtual ~ParseCmdLineException() throw() {
+        }
+
+        virtual const char *what() const throw() {
+            return what_.c_str();
+        }
+
+    private:
+        std::string what_;
+};
 
 void printHelp() {
     std::cout << std::endl;
     std::cout << "-k, --key       ipc communication-key" << std::endl;
-    std::cout << "-f, --frequency [server-mode] " << std::endl;
-    std::cout << "-d, --data      [client-mode] [blue];[red];[green];[white];[duration]" << std::endl;
-    std::cout << "-a, --action    [client-mode] [EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [HALT] | [CONTINUE] | [RESET] | [TERMINATE]" << std::endl;
+    std::cout << "-d, --data      [blue];[red];[green];[white];[duration]" << std::endl;
+    std::cout << "-a, --action    [EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [HALT] | [CONTINUE] | [RESET] | [TERMINATE]" << std::endl;
     std::cout << "-h, --help      shows this help" << std::endl;
     std::cout << "-v, --version   shows version-info" << std::endl;
 }
 
-int main(int argc, char** argv) {
-    int freq                  = 120;
-    int key                   = moba::IPC::DEFAULT_KEY;
-    moba::IPC::Command action = moba::IPC::CMD_RUN;
-    std::string data          = "";
-
+bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
     static struct option longOptions[] = {
         {"key",       required_argument, 0, 'k'},
-        {"frequency", required_argument, 0, 'f'},
         {"data",      required_argument, 0, 'd'},
         {"action",    required_argument, 0, 'a'},
         {"help",      no_argument,       0, 'h'},
@@ -74,63 +95,58 @@ int main(int argc, char** argv) {
     int optionIndex = 0;
 
     while (true) {
-        int c = getopt_long(argc, argv, "k:f:d:a:hv", longOptions, &optionIndex);
+        int c = getopt_long(argc, argv, "k:d:a:hv", longOptions, &optionIndex);
         if(c == -1) {
             break;
         }
 
         switch (c) {
             case 'k':
-                key = atoi(optarg);
-                break;
-
-            case 'f':
-                freq = atoi(optarg);
+                args.key = atoi(optarg);
                 break;
 
             case 'd':
-                data = std::string(optarg);
+                args.data = std::string(optarg);
                 break;
 
             case 'a':
-                action = moba::IPC::getCMDFromString(optarg);
+                args.action = moba::IPC::getCMDFromString(optarg);
                 break;
 
             case 'h':
                 printHelp();
-                return EXIT_SUCCESS;
+                return true;
 
             case 'v':
                 moba::printAppData(appData);
-                return EXIT_SUCCESS;
+                return true;
         }
     }
-
-    if(action != moba::IPC::CMD_RUN || data != "") {
-        moba::IPC ipc(key, moba::IPC::TYPE_CLIENT);
-        ipc.send(data, action);
-        return EXIT_SUCCESS;
+    if(args.action == moba::IPC::CMD_RUN && args.data == "") {
+        throw ParseCmdLineException("no data given!");
     }
-    LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
-    LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
+    if(args.action != moba::IPC::CMD_RUN && args.data != "") {
+        throw ParseCmdLineException("invalid action given!");
+    }
+    return false;
+}
 
-    moba::setCoreFileSizeToULimit();
-
-    boost::shared_ptr<Bridge> bridge(new Bridge());
-    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
-    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler());
-    sigTerm->observeSignal(SIGTERM);
-    sigTerm->observeSignal(SIGINT);
-
-    bridge->setPWMFrequency(freq);
-    Handler handler(bridge, ipc, sigTerm);
+int main(int argc, char** argv) {
+    CmdLineArguments args = {
+        moba::IPC::DEFAULT_KEY,
+        moba::IPC::CMD_RUN,
+        ""
+    };
 
     try {
-        handler.run();
+        if(!parseArguments(argc, argv, args)) {
+            return EXIT_SUCCESS;
+        }
+        moba::IPC ipc(args.key, moba::IPC::TYPE_CLIENT);
+        ipc.send(args.data, args.action);
     } catch(std::exception &e) {
         LOG(moba::WARNING) << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
-
-    bridge->setAllOff();
     return EXIT_SUCCESS;
 }
