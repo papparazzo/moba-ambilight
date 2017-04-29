@@ -9,7 +9,10 @@ Makefile.in
 /compile
 /stamp-h1
 /config.log
-/Makefile
+Makefile
+moba-ambilight
+moba-ambilightd
+core
 /.deps
 /m4/*
 
