@@ -36,9 +36,9 @@ double Plasma::d3(int x, double t) {
 
     std::cerr << "x: " << x << " t: " << t << " ";
     std::cerr << "red: " << (4094 * r) << " green: " << (4094 * g) << " blue: " << (4094 * b) << std::endl;
-    this->bridge->setPWMlg(Bridge::RED, (2000 * r));
-    this->bridge->setPWMlg(Bridge::GREEN, (2000 * g));
-    this->bridge->setPWMlg(Bridge::BLUE, (2000 * b));
+    this->bridge->setPWMlg(Bridge::RED, x, (2000 * r));
+    this->bridge->setPWMlg(Bridge::GREEN, x, (2000 * g));
+    this->bridge->setPWMlg(Bridge::BLUE, x, (2000 * b));
 
 }
 
@@ -50,6 +50,8 @@ void Plasma::run() {
         }
         delayMicroseconds(50);
         i = ++i % 1000;
+        d3(0, (double)i * PI / 500);
         d3(1, (double)i * PI / 500);
+        d3(2, (double)i * PI / 500);
     } while(true);
 }
