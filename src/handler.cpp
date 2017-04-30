@@ -24,6 +24,7 @@
 #include <moba/log.h>
 #include <wiringPi.h>
 #include <string.h>
+#include <sys/time.h>
 
 const Bridge::BankColor Handler::bcolor[] = {
     Bridge::BLUE,
@@ -37,22 +38,70 @@ Handler::Handler(
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
 ) {
-    this->bridge = bridge;
-    this->ipc = ipc;
-    this->sigTerm = sigTerm;
+    this->ipc       = ipc;
+    this->bridge    = bridge;
+    this->sigTerm   = sigTerm;
+    this->emergency = false;
+    this->halted    = false;
+
     for(int i = 0; i < 4; ++i) {
-        this->currRatio[i] = 0;
+        // FIXME this->currRatio[i] = 0;
     }
 }
 
-void Handler::emergency() {
-    this->bridge->setPWMlg(Bridge::BLUE,  0);
-    this->bridge->setPWMlg(Bridge::GREEN, 0);
-    this->bridge->setPWMlg(Bridge::RED,   0);
-    this->bridge->setPWMlg(Bridge::WHITE, 255);
+void Handler::run() {
+/*
+    int i = 0;
+
+    do {
+        delayMicroseconds(target.duration);
+        for(int j = 0; j < 4; ++j) {
+            if(!this->step[j] || i % this->step[j]) {
+                continue;
+            }
+            if(this->step[j] > 0 && this->current.targetIntensity[j] < Handler::RANGE) {
+                this->current.targetIntensity[j]++;
+            }
+            if(this->step[j] < 0 && this->current.targetIntensity[j] > 0) {
+                this->current.targetIntensity[j]--;
+            }
+            this->bridge->setPWMlg(Handler::bcolor[j], this->current.targetIntensity[j]);
+        }
+
+        i = i++ % Handler::STEPS;
+
+        if(i) {
+            continue;
+        }
+
+    } while(true);
+ */
 }
 
+
+void Handler::setTargetValues(TargetValues newValues) {
+    this->tmp = this->current;
+
+    for(int i = 0; i < 4; ++i) {
+        if(!newValues.duration) {
+            this->current.targetIntensity[i] = newValues.targetIntensity[i];
+            this->bridge->setPWMlg(Handler::bcolor[i], this->current.targetIntensity[i]);
+        } else if(newValues.targetIntensity[i] - this->current.targetIntensity[i]) {
+            this->step[i] = Handler::STEPS / (newValues.targetIntensity[i] - this->current.targetIntensity[i]);
+        } else {
+            this->step[i] = 0;
+        }
+    }
+}
+
+
+
+
+
 void Handler::test() {
+    this->bridge->setPWMlg(Bridge::BLUE, 0);
+    this->bridge->setPWMlg(Bridge::GREEN, 0);
+    this->bridge->setPWMlg(Bridge::WHITE, 0);
     this->bridge->setPWMlg(Bridge::RED, 211);
     sleep(1);
     this->bridge->setPWMlg(Bridge::RED, 0);
@@ -71,70 +120,35 @@ void Handler::test() {
     this->bridge->setPWMlg(Bridge::GREEN, 211);
     sleep(1);
     this->bridge->setAllOff();
-    sleep(1);
-    this->resume();
-}
-
-void Handler::resume() {
+    sleep(1);/*
     for(int j = 0; j < 4; ++j) {
         this->bridge->setPWMlg(Handler::bcolor[j], this->currRatio[j]);
     }
+    */
 }
 
-void Handler::run() {
-    int step[4];
 
-    while(true) {
-        this->fetchNextMsg();
-        if(!this->buffer.getItemsCount()) {
-            usleep(50000);
-            continue;
-        }
 
-        TargetValues target = this->buffer.pop();
 
-        for(int i = 0; i < 4; ++i) {
-            if(!target.duration) {
-                this->currRatio[i] = target.targetIntensity[i];
-                this->bridge->setPWMlg(Handler::bcolor[i], this->currRatio[i]);
-            } else if(target.targetIntensity[i] - this->currRatio[i]) {
-                step[i] = Handler::STEPS / (target.targetIntensity[i] - this->currRatio[i]);
-            } else {
-                step[i] = 0;
-            }
-        }
+void getNextTarget() {
 
-        if(!target.duration) {
-            continue;
-        }
-
-        for(int i = 1; i <= Handler::STEPS; ++i) {
-            delayMicroseconds(target.duration);
-            for(int j = 0; j < 4; ++j) {
-                if(!step[j] || i % step[j]) {
-                    continue;
-                }
-                if(step[j] > 0 && this->currRatio[j] < Handler::RANGE) {
-                    this->currRatio[j]++;
-                }
-                if(step[j] < 0 && this->currRatio[j] > 0) {
-                    this->currRatio[j]--;
-                }
-                this->bridge->setPWMlg(Handler::bcolor[j], this->currRatio[j]);
-            }
-
-            if(!this->fetchNextMsg()) {
-                break;
-            }
-        }
-        LOG(moba::DEBUG) << "<-- iteration #" << target.counter << " finished..." << std::endl;
-    }
 }
+
+
+
 
 bool Handler::fetchNextMsg() {
+
+    if(!this->buffer.getItemsCount()) {
+        usleep(50000);
+        //continue;
+    }
+
+    //TargetValues target = this->buffer.pop();
+    TargetValues target;
+
+
     moba::IPC::Message msg;
-    bool emergency = false;
-    bool halted    = false;
 
     while(true) {
         if(this->sigTerm->hasAnySignalTriggered()) {
@@ -142,7 +156,7 @@ bool Handler::fetchNextMsg() {
         }
 
         if(!this->ipc->receive(msg)) {
-            if(emergency || halted) {
+            if(this->emergency || this->halted) {
                 usleep(50000);
                 continue;
             }
@@ -152,50 +166,57 @@ bool Handler::fetchNextMsg() {
         switch(msg.mtype) {
             case moba::IPC::CMD_EMERGENCY_STOP:
                 LOG(moba::DEBUG) << "emergency..." << std::endl;
-                if(emergency) {
+                if(this->emergency) {
                     LOG(moba::WARNING) << "emergency allready set!" << std::endl;
                     break;
                 }
-                this->emergency();
-                emergency = true;
+                TargetValues target;
+                target.targetIntensity[0] = 0;
+                /*
+                        ... // FIXME
+                        ...
+                        ...
+                 */
+                this->setTargetValues(target);
+                this->emergency = true;
                 break;
 
             case moba::IPC::CMD_EMERGENCY_RELEASE:
                 LOG(moba::DEBUG) << "emergency... off" << std::endl;
-                if(emergency) {
-                    this->resume();
-                    emergency = false;
+                if(this->emergency) {
+                    this->setTargetValues(this->tmp);
+                    this->emergency = false;
                 } else {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                 }
-                if(!halted) {
+                if(!this->halted) {
                     return true;
                 }
                 break;
 
             case moba::IPC::CMD_HALT:
                 LOG(moba::DEBUG) << "halt..." << std::endl;
-                if(halted) {
+                if(this->halted) {
                     LOG(moba::WARNING) << "already halted!" << std::endl;
                     break;
                 }
-                halted = true;
+                this->halted = true;
                 break;
 
             case moba::IPC::CMD_CONTINUE:
                 LOG(moba::DEBUG) << "continue..." << std::endl;
-                if(!halted) {
+                if(!this->halted) {
                     LOG(moba::WARNING) << "halted not set!" << std::endl;
                 }
-                halted = false;
-                if(!emergency) {
+                this->halted = false;
+                if(!this->emergency) {
                     return true;
                 }
                 break;
 
             case moba::IPC::CMD_TEST:
                 LOG(moba::DEBUG) << "testing... " << std::endl;
-                if(emergency || halted) {
+                if(this->emergency || this->halted) {
                     LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
                     break;
                 }
@@ -217,14 +238,14 @@ bool Handler::fetchNextMsg() {
             case moba::IPC::CMD_RUN:
                 LOG(moba::DEBUG) << "run... " << std::endl;
                 this->buffer.push(this->parseMessageData(msg.mtext));
-                if(!emergency && !halted) {
+                if(!this->emergency && !this->halted) {
                     return true;
                 }
                 break;
 
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
-                if(!emergency && !halted) {
+                if(!this->emergency && !this->halted) {
                     return true;
                 }
                 break;

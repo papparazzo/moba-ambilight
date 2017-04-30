@@ -75,16 +75,21 @@ class Handler : private boost::noncopyable {
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
         void test();
-        void emergency();
-        void resume();
 
         bool fetchNextMsg();
         TargetValues parseMessageData(const std::string &data);
 
+        void setTargetValues(TargetValues newValues);
+
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;
 
-        int currRatio[4];
+        bool emergency;
+        bool halted;
+
+        TargetValues current;
+        TargetValues tmp;
+        int step[4];
 
         const static Bridge::BankColor bcolor[];
 
