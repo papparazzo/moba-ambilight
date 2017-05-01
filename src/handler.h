@@ -1,5 +1,5 @@
 /*
- *  Project:    CommonLib
+ *  Project:    moba-ambilight
  *
  *  Version:    1.0.0
  *
@@ -29,6 +29,7 @@
 #include <exception>
 
 #include "bridge.h"
+#include "targetvalues.h"
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
@@ -64,12 +65,6 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        struct TargetValues {
-            int targetIntensity[4];
-            int duration;
-            unsigned int counter;
-        };
-
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
@@ -79,7 +74,7 @@ class Handler : private boost::noncopyable {
         bool fetchNextMsg();
         TargetValues parseMessageData(const std::string &data);
 
-        void setTargetValues(TargetValues newValues);
+        void setTargetValues(const TargetValues &newValues);
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;

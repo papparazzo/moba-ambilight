@@ -1,5 +1,5 @@
 /*
- *  Project:    CommonLib
+ *  Project:    moba-ambilight
  *
  *  Version:    1.0.0
  *
@@ -76,7 +76,7 @@ void Handler::run() {
 }
 
 
-void Handler::setTargetValues(TargetValues newValues) {
+void Handler::setTargetValues(const TargetValues &newValues) {
     tmp = current;
 
     for(int i = 0; i < 4; ++i) {
@@ -90,10 +90,6 @@ void Handler::setTargetValues(TargetValues newValues) {
         }
     }
 }
-
-
-
-
 
 void Handler::test() {
     bridge->setPWMlg(Bridge::BLUE, 0);
@@ -117,22 +113,12 @@ void Handler::test() {
     bridge->setPWMlg(Bridge::GREEN, 211);
     sleep(1);
     bridge->setAllOff();
-    sleep(1);/*
-    for(int j = 0; j < 4; ++j) {
-        bridge->setPWMlg(Handler::bcolor[j], currRatio[j]);
-    }
-    */
+    sleep(1);
 }
-
-
-
 
 void getNextTarget() {
 
 }
-
-
-
 
 bool Handler::fetchNextMsg() {
 
@@ -161,22 +147,22 @@ bool Handler::fetchNextMsg() {
         }
 
         switch(msg.mtype) {
-            case moba::IPC::CMD_EMERGENCY_STOP:
+            case moba::IPC::CMD_EMERGENCY_STOP: {
                 LOG(moba::DEBUG) << "emergency..." << std::endl;
                 if(emergency) {
                     LOG(moba::WARNING) << "emergency allready set!" << std::endl;
                     break;
                 }
                 TargetValues target;
-                target.targetIntensity[0] = 0;
-                /*
-                        ... // FIXME
-                        ...
-                        ...
-                 */
+                target.targetIntensity[Bridge::WHITE] = 0;
+                target.targetIntensity[Bridge::GREEN] = 0;
+                target.targetIntensity[Bridge::RED  ] = 0;
+                target.targetIntensity[Bridge::BLUE ] = 0;
+                target.duration = 20;
                 setTargetValues(target);
                 emergency = true;
                 break;
+            }
 
             case moba::IPC::CMD_EMERGENCY_RELEASE:
                 LOG(moba::DEBUG) << "emergency... off" << std::endl;
@@ -250,8 +236,7 @@ bool Handler::fetchNextMsg() {
     }
 }
 
-Handler::TargetValues Handler::parseMessageData(const std::string &data) {
-    static int counter = 0;
+TargetValues Handler::parseMessageData(const std::string &data) {
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
@@ -274,18 +259,17 @@ Handler::TargetValues Handler::parseMessageData(const std::string &data) {
         }
         pos = found + 1;
     }
-    target.counter = counter++;
-    LOG(moba::DEBUG) << "--> " << "inserting #" << target.counter << "..." << std::endl;
+    LOG(moba::DEBUG) << "--> " << "inserting #" << target.getObjectId() << "..." << std::endl;
 
     LOG(moba::DEBUG) <<
             "--> duration: ~" << target.duration <<
             " sec. (~" << (int)(target.duration / 60) << " min.)" << std::endl;
     LOG(moba::DEBUG) <<
             "--> targets" <<
-            " blue: " << target.targetIntensity[0] <<
-            " green: " << target.targetIntensity[1] <<
-            " red: " << target.targetIntensity[2] <<
-            " white: " << target.targetIntensity[3] << std::endl;
+            " blue: " << target.targetIntensity[Bridge::BLUE] <<
+            " green: " << target.targetIntensity[Bridge::GREEN] <<
+            " red: " << target.targetIntensity[Bridge::RED] <<
+            " white: " << target.targetIntensity[Bridge::WHITE] << std::endl;
     target.duration = static_cast<int>((target.duration * 1000 * 1000) / Handler::STEPS);
     return target;
 }
