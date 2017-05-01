@@ -52,15 +52,13 @@ int main(int argc, char** argv) {
     moba::setCoreFileSizeToULimit();
 
     boost::shared_ptr<Bridge> bridge(new Bridge());
-    //boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
+    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
     boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler());
     sigTerm->observeSignal(SIGTERM);
     sigTerm->observeSignal(SIGINT);
 
     bridge->setPWMFrequency(freq);
-    //Handler handler(bridge, ipc, sigTerm);
-
-    Plasma handler(bridge, sigTerm);
+    Handler handler(bridge, ipc, sigTerm);
 
     try {
         handler.run();

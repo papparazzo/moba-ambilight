@@ -9,8 +9,8 @@ Plasma::Plasma(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::SignalHandler> sigTerm
 ) {
-    this->bridge    = bridge;
-    this->sigTerm   = sigTerm;
+    bridge    = bridge;
+    sigTerm   = sigTerm;
 }
 
 double Plasma::d(int x, double t) {
@@ -36,16 +36,16 @@ double Plasma::d3(int x, double t) {
 
     std::cerr << "x: " << x << " t: " << t << " ";
     std::cerr << "red: " << (4094 * r) << " green: " << (4094 * g) << " blue: " << (4094 * b) << std::endl;
-    this->bridge->setPWMlg(Bridge::RED, x, (2000 * r));
-    this->bridge->setPWMlg(Bridge::GREEN, x, (2000 * g));
-    this->bridge->setPWMlg(Bridge::BLUE, x, (2000 * b));
+    bridge->setPWMlg(Bridge::RED, x, (2000 * r));
+    bridge->setPWMlg(Bridge::GREEN, x, (2000 * g));
+    bridge->setPWMlg(Bridge::BLUE, x, (2000 * b));
 
 }
 
 void Plasma::run() {
     int i = 0;
     do {
-        if(this->sigTerm->hasAnySignalTriggered()) {
+        if(sigTerm->hasAnySignalTriggered()) {
             return;
         }
         delayMicroseconds(50);

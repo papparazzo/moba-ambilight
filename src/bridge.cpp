@@ -157,23 +157,23 @@ namespace {
 }
 
 Bridge::Bridge(int address) {
-    this->fd = wiringPiI2CSetup(address);
-    if(this->fd == -1) {
+    fd = wiringPiI2CSetup(address);
+    if(fd == -1) {
         throw BridgeException(moba::getErrno("wiringPiI2CSetup"));
     }
-    this->setAllOff();
+    setAllOff();
 
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE2, Bridge::OUTDRV);
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE1, Bridge::ALLCALL);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE2, Bridge::OUTDRV);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE1, Bridge::ALLCALL);
     usleep(5000);
-    int mode1 = wiringPiI2CReadReg8(this->fd, Bridge::MODE1);
+    int mode1 = wiringPiI2CReadReg8(fd, Bridge::MODE1);
     mode1 = mode1 & ~Bridge::SLEEP;
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE1, mode1);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE1, mode1);
     usleep(5000);
 }
 
 Bridge::~Bridge() {
-    close(this->fd);
+    close(fd);
 }
 
 void Bridge::softwareReset() {
@@ -200,57 +200,57 @@ void Bridge::setPWMFrequency(int freq) {
 
     int prescale = (int)oscClock + 0.5;
 
-    int oldmode = wiringPiI2CReadReg8(this->fd, Bridge::MODE1);
+    int oldmode = wiringPiI2CReadReg8(fd, Bridge::MODE1);
     int newmode = (oldmode & 0x7F) | 0x10;
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE1, newmode);
-    wiringPiI2CWriteReg8(this->fd, Bridge::PRESCALE, prescale);
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE1, oldmode);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE1, newmode);
+    wiringPiI2CWriteReg8(fd, Bridge::PRESCALE, prescale);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE1, oldmode);
     usleep(5000);
-    wiringPiI2CWriteReg8(this->fd, Bridge::MODE1, oldmode | 0x80);
+    wiringPiI2CWriteReg8(fd, Bridge::MODE1, oldmode | 0x80);
 }
 
 void Bridge::setOn(BankColor color) {
     for(int i = 0; i < 4; ++i) {
-        this->setData(color, i, 4096, 0);
+        setData(color, i, 4096, 0);
     }
 }
 
 void Bridge::setOff(BankColor color) {
     for(int i = 0; i < 4; ++i) {
-        this->setData(color, i, 0, 0);
+        setData(color, i, 0, 0);
     }
 }
 
 void Bridge::setPWM(BankColor color, int on, int off) {
     for(int i = 0; i < 4; ++i) {
-        this->setData(color, i, on, off);
+        setData(color, i, on, off);
     }
 }
 
 void Bridge::setPWMlg(BankColor color, int val) {
     for(int i = 0; i < 4; ++i) {
-        this->setPWMlg(color, i, val);
+        setPWMlg(color, i, val);
     }
 }
 
 void Bridge::setPWMlg(BankColor color, int bank, int val) {
-    this->setData(color, bank, 0, table[val]);
+    setData(color, bank, 0, table[val]);
 }
 
 void Bridge::setData(Bridge::BankColor color, int bank, int on, int off) {
     int channel = (bank * 4 + color) * 4;
 
-    wiringPiI2CWriteReg8(this->fd, Bridge::LED0_ON_L + channel, on & 0xFF);
-    wiringPiI2CWriteReg8(this->fd, Bridge::LED0_ON_H + channel, on >> 8);
-    wiringPiI2CWriteReg8(this->fd, Bridge::LED0_OFF_L + channel, off & 0xFF);
-    wiringPiI2CWriteReg8(this->fd, Bridge::LED0_OFF_H + channel, off >> 8);
+    wiringPiI2CWriteReg8(fd, Bridge::LED0_ON_L + channel, on & 0xFF);
+    wiringPiI2CWriteReg8(fd, Bridge::LED0_ON_H + channel, on >> 8);
+    wiringPiI2CWriteReg8(fd, Bridge::LED0_OFF_L + channel, off & 0xFF);
+    wiringPiI2CWriteReg8(fd, Bridge::LED0_OFF_H + channel, off >> 8);
 }
 
 void Bridge::setAllOff() {
-    wiringPiI2CWriteReg8(this->fd, Bridge::ALL_LED_ON_L, 0);
-    wiringPiI2CWriteReg8(this->fd, Bridge::ALL_LED_ON_H, 0);
-    wiringPiI2CWriteReg8(this->fd, Bridge::ALL_LED_OFF_L, 0);
-    wiringPiI2CWriteReg8(this->fd, Bridge::ALL_LED_OFF_H, 0);
+    wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_ON_L, 0);
+    wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_ON_H, 0);
+    wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_OFF_L, 0);
+    wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_OFF_H, 0);
 }
 
 const char *Bridge::getColorName(BankColor c) {

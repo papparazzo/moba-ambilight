@@ -42,11 +42,11 @@ class HandlerException : public std::exception {
         }
 
         HandlerException(const std::string &what) {
-            this->what__ = what;
+            what__ = what;
         }
 
         virtual const char* what() const throw() {
-            return this->what__.c_str();
+            return what__.c_str();
         }
 
     private:
