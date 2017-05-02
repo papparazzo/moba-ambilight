@@ -76,7 +76,7 @@ class ParseCmdLineException : public std::exception {
 void printHelp() {
     std::cout << std::endl;
     std::cout << "-k, --key       ipc communication-key" << std::endl;
-    std::cout << "-d, --data      [blue];[red];[green];[white];[duration]" << std::endl;
+    std::cout << "-d, --data      [blue];[red];[green];[white];[duration];[wobble{W}]" << std::endl;
     std::cout << "-a, --action    [EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [HALT] | [CONTINUE] | [RESET] | [TERMINATE]" << std::endl;
     std::cout << "-h, --help      shows this help" << std::endl;
     std::cout << "-v, --version   shows version-info" << std::endl;

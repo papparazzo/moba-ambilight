@@ -81,12 +81,13 @@ class Handler : private boost::noncopyable {
 
         bool emergency;
         bool halted;
+        bool interrupted;
 
         TargetValues current;
-        TargetValues tmp;
         int step[4];
 
         const static Bridge::BankColor bcolor[];
 
-        moba::Ringbuffer<TargetValues> buffer;
+        moba::Ringbuffer<TargetValues> regularBuffer;
+        moba::Ringbuffer<TargetValues> interruptBuffer;
 };

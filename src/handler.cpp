@@ -38,17 +38,27 @@ Handler::Handler(
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
 ) : ipc(ipc), bridge(bridge), sigTerm(sigTerm) {
-    emergency = false;
-    halted    = false;
-
-    for(int i = 0; i < 4; ++i) {
-        // FIXME currRatio[i] = 0;
-    }
+    emergency   = false;
+    halted      = false;
+    interrupted = false;
 }
 
 void Handler::run() {
-/*
+
     int i = 0;
+    fetchNextMsg();
+
+/**7
+     if(!buffer.getItemsCount()) {
+        usleep(50000);
+        //continue;
+    }
+
+    //TargetValues target = buffer.pop();
+    TargetValues target;
+
+ */
+
 
     do {
         delayMicroseconds(target.duration);
@@ -72,13 +82,9 @@ void Handler::run() {
         }
 
     } while(true);
- */
 }
 
-
 void Handler::setTargetValues(const TargetValues &newValues) {
-    tmp = current;
-
     for(int i = 0; i < 4; ++i) {
         if(!newValues.duration) {
             current.targetIntensity[i] = newValues.targetIntensity[i];
@@ -116,26 +122,13 @@ void Handler::test() {
     sleep(1);
 }
 
-void getNextTarget() {
-
-}
-
 bool Handler::fetchNextMsg() {
-
-    if(!buffer.getItemsCount()) {
-        usleep(50000);
-        //continue;
-    }
-
-    //TargetValues target = buffer.pop();
-    TargetValues target;
-
-
     moba::IPC::Message msg;
+    TargetValues tmp;
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
-            throw HandlerException("sigterm catched");
+            throw HandlerException("sigterm caught");
         }
 
         if(!ipc->receive(msg)) {
@@ -150,54 +143,46 @@ bool Handler::fetchNextMsg() {
             case moba::IPC::CMD_EMERGENCY_STOP: {
                 LOG(moba::DEBUG) << "emergency..." << std::endl;
                 if(emergency) {
-                    LOG(moba::WARNING) << "emergency allready set!" << std::endl;
+                    LOG(moba::WARNING) << "emergency already set!" << std::endl;
                     break;
                 }
-                TargetValues target;
-                target.targetIntensity[Bridge::WHITE] = 0;
-                target.targetIntensity[Bridge::GREEN] = 0;
-                target.targetIntensity[Bridge::RED  ] = 0;
-                target.targetIntensity[Bridge::BLUE ] = 0;
-                target.duration = 20;
+                tmp = current;
+                TargetValues target = parseMessageData(msg.mtext);
                 setTargetValues(target);
                 emergency = true;
                 break;
             }
 
-            case moba::IPC::CMD_EMERGENCY_RELEASE:
+            case moba::IPC::CMD_EMERGENCY_RELEASE: {
                 LOG(moba::DEBUG) << "emergency... off" << std::endl;
-                if(emergency) {
-                    setTargetValues(tmp);
-                    emergency = false;
-                } else {
+                if(!emergency) {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
+                    break;
                 }
-                if(!halted) {
-                    return true;
-                }
+                setTargetValues(tmp);
+                emergency = false;
                 break;
+            }
 
-            case moba::IPC::CMD_HALT:
+            case moba::IPC::CMD_HALT: {
                 LOG(moba::DEBUG) << "halt..." << std::endl;
                 if(halted) {
                     LOG(moba::WARNING) << "already halted!" << std::endl;
-                    break;
                 }
                 halted = true;
                 break;
+            }
 
-            case moba::IPC::CMD_CONTINUE:
+            case moba::IPC::CMD_CONTINUE: {
                 LOG(moba::DEBUG) << "continue..." << std::endl;
                 if(!halted) {
                     LOG(moba::WARNING) << "halted not set!" << std::endl;
                 }
                 halted = false;
-                if(!emergency) {
-                    return true;
-                }
                 break;
+            }
 
-            case moba::IPC::CMD_TEST:
+            case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
                 if(emergency || halted) {
                     LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
@@ -206,35 +191,61 @@ bool Handler::fetchNextMsg() {
                 test();
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
                 return true;
+            }
 
-            case moba::IPC::CMD_TERMINATE:
+            case moba::IPC::CMD_TERMINATE: {
                 LOG(moba::DEBUG) << "terminate... " << std::endl;
                 throw HandlerException("terminate received");
-                break;
+            }
 
-            case moba::IPC::CMD_RESET:
+            case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
-                buffer.reset();
+                interruptBuffer.reset();
+                regularBuffer.reset();
+                emergency = false;
+                halted = false;
+                interrupted = false;
                 bridge->setAllOff();
-                return false;
-
-            case moba::IPC::CMD_RUN:
-                LOG(moba::DEBUG) << "run... " << std::endl;
-                buffer.push(parseMessageData(msg.mtext));
-                if(!emergency && !halted) {
-                    return true;
-                }
+                // FIXME: delete Target ???
                 break;
+            }
+
+            case moba::IPC::CMD_RUN: {
+                LOG(moba::DEBUG) << "run... " << std::endl;
+                regularBuffer.push(parseMessageData(msg.mtext));
+                break;
+            }
+
+            case moba::IPC::CMD_INTERRUPT: {
+                LOG(moba::DEBUG) << "interrupt... " << std::endl;
+                interrupted = true;
+                interruptBuffer.push(parseMessageData(msg.mtext));
+                break;
+            }
+
+            case moba::IPC::CMD_RESUME: {
+                LOG(moba::DEBUG) << "resume... " << std::endl;
+                interruptBuffer.reset();
+                interrupted = false;
+                // TODO: goto default target
+                break;
+            }
 
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
-                if(!emergency && !halted) {
-                    return true;
-                }
                 break;
+        }
+        if(!emergency && !halted) {
+            return true;
         }
     }
 }
+
+
+
+
+
+
 
 TargetValues Handler::parseMessageData(const std::string &data) {
     std::string::size_type pos = 0;
@@ -243,33 +254,46 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     TargetValues target;
     int val;
 
-    for(int i = 0; i < 5; ++i) {
+    for(int i = 0; i < 6; ++i) {
         found = data.find(';', pos);
-        if(i < 4) {
-            val = atoi(data.substr(pos, found - pos).c_str());
-            if(val < 0) {
-                val = 0;
-            }
-            if(val > 4095) {
-                val = 4095;
-            }
-            target.targetIntensity[i] = val;
-        } else {
-            target.duration = atoi(data.substr(pos, found - pos).c_str());
+        switch(i) {
+            case Bridge::WHITE:
+            case Bridge::GREEN:
+            case Bridge::RED:
+            case Bridge::BLUE:
+                val = atoi(data.substr(pos, found - pos).c_str());
+                if(val < 0) {
+                    val = 0;
+                }
+                if(val > 4095) {
+                    val = 4095;
+                }
+                target.targetIntensity[i] = val;
+                break;
+            case 5:
+                target.duration = atoi(data.substr(pos, found - pos).c_str());
+                break;
+
+            case 6:
+                if(data.substr(pos, found - pos) == "W") {
+                    target.wobble = true;
+                }
+                break;
         }
         pos = found + 1;
     }
     LOG(moba::DEBUG) << "--> " << "inserting #" << target.getObjectId() << "..." << std::endl;
-
     LOG(moba::DEBUG) <<
             "--> duration: ~" << target.duration <<
             " sec. (~" << (int)(target.duration / 60) << " min.)" << std::endl;
     LOG(moba::DEBUG) <<
             "--> targets" <<
-            " blue: " << target.targetIntensity[Bridge::BLUE] <<
+            " white: " << target.targetIntensity[Bridge::WHITE] <<
             " green: " << target.targetIntensity[Bridge::GREEN] <<
             " red: " << target.targetIntensity[Bridge::RED] <<
-            " white: " << target.targetIntensity[Bridge::WHITE] << std::endl;
+            " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
+    LOG(moba::DEBUG) <<
+            "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
     target.duration = static_cast<int>((target.duration * 1000 * 1000) / Handler::STEPS);
     return target;
 }

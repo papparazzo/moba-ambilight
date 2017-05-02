@@ -29,6 +29,7 @@ class TargetValues {
 
         int targetIntensity[4];
         int duration;
+        bool wobble;
 
         unsigned int getObjectId() const;
 
@@ -37,5 +38,4 @@ class TargetValues {
         static unsigned int counter;
 
 };
-
 
