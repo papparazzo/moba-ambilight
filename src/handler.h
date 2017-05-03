@@ -83,6 +83,8 @@ class Handler : private boost::noncopyable {
         bool halted;
         bool interrupted;
 
+        int duration;
+
         TargetValues current;
         int step[4];
 

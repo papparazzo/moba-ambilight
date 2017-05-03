@@ -61,7 +61,7 @@ void Handler::run() {
 
 
     do {
-        delayMicroseconds(target.duration);
+        delayMicroseconds(duration);
         for(int j = 0; j < 4; ++j) {
             if(!step[j] || i % step[j]) {
                 continue;
@@ -86,7 +86,7 @@ void Handler::run() {
 
 void Handler::setTargetValues(const TargetValues &newValues) {
     for(int i = 0; i < 4; ++i) {
-        if(!newValues.duration) {
+        if(!duration || newValues.direkt) {
             current.targetIntensity[i] = newValues.targetIntensity[i];
             bridge->setPWMlg(Handler::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
@@ -124,7 +124,8 @@ void Handler::test() {
 
 bool Handler::fetchNextMsg() {
     moba::IPC::Message msg;
-    TargetValues tmp;
+    TargetValues tmpTarget;
+    int tmpDuration;
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -146,7 +147,9 @@ bool Handler::fetchNextMsg() {
                     LOG(moba::WARNING) << "emergency already set!" << std::endl;
                     break;
                 }
-                tmp = current;
+                tmpTarget = current;
+                tmpDuration = duration;
+                duration = 5;
                 TargetValues target = parseMessageData(msg.mtext);
                 setTargetValues(target);
                 emergency = true;
@@ -159,7 +162,8 @@ bool Handler::fetchNextMsg() {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                     break;
                 }
-                setTargetValues(tmp);
+                setTargetValues(tmpTarget);
+                duration = tmpDuration;
                 emergency = false;
                 break;
             }
@@ -231,6 +235,16 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
+            case moba::IPC::CMD_ET_DURATION: {
+                LOG(moba::DEBUG) << "set duration... " << std::endl;
+                duration = atoi(msg.mtext);
+                LOG(moba::DEBUG) <<
+                    "--> duration: ~" << duration <<
+                    " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
+                duration = static_cast<int>((duration * 1000 * 1000) / Handler::STEPS);
+                break;
+            }
+
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
@@ -254,7 +268,7 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     TargetValues target;
     int val;
 
-    for(int i = 0; i < 6; ++i) {
+    for(int i = 0; i < 5; ++i) {
         found = data.find(';', pos);
         switch(i) {
             case Bridge::WHITE:
@@ -270,22 +284,22 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                 }
                 target.targetIntensity[i] = val;
                 break;
-            case 5:
-                target.duration = atoi(data.substr(pos, found - pos).c_str());
-                break;
 
-            case 6:
-                if(data.substr(pos, found - pos) == "W") {
-                    target.wobble = true;
+            case 5:
+                switch(data.substr(pos, found - pos)[0]) {
+                    case 'W':
+                        target.wobble = true;
+                        break;
+
+                    case 'D':
+                        target.direkt = true;
+                        break;
                 }
                 break;
         }
         pos = found + 1;
     }
     LOG(moba::DEBUG) << "--> " << "inserting #" << target.getObjectId() << "..." << std::endl;
-    LOG(moba::DEBUG) <<
-            "--> duration: ~" << target.duration <<
-            " sec. (~" << (int)(target.duration / 60) << " min.)" << std::endl;
     LOG(moba::DEBUG) <<
             "--> targets" <<
             " white: " << target.targetIntensity[Bridge::WHITE] <<
@@ -294,6 +308,5 @@ TargetValues Handler::parseMessageData(const std::string &data) {
             " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
     LOG(moba::DEBUG) <<
             "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
-    target.duration = static_cast<int>((target.duration * 1000 * 1000) / Handler::STEPS);
     return target;
 }

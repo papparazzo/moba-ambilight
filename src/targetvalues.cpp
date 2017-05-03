@@ -27,6 +27,7 @@ unsigned int TargetValues::counter = 0;
 TargetValues::TargetValues() {
     targetIntensity = {0, 0, 0, 0};
     wobble = false;
+    direkt = false;
     objNb = counter++;
 }
 
