@@ -21,12 +21,8 @@
  */
 
 #include <cstdlib>
-#include <boost/shared_ptr.hpp>
 #include <getopt.h>
 #include <exception>
-
-#include "bridge.h"
-#include "handler.h"
 
 #include <config.h>
 
@@ -34,7 +30,6 @@
 #include <moba/log.h>
 #include <moba/helper.h>
 #include <moba/signalhandler.h>
-#include <stdlib.h>
 
 namespace {
     moba::AppData appData = {
@@ -89,7 +84,7 @@ bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
         {"action",    required_argument, 0, 'a'},
         {"help",      no_argument,       0, 'h'},
         {"version",   no_argument,       0, 'v'},
-        {NULL,      0, NULL, 0}
+        {NULL,        0,              NULL,   0}
     };
 
     int optionIndex = 0;
