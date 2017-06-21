@@ -29,8 +29,8 @@
 class Plasma {
     public:
         Plasma(
-            boost::shared_ptr<Bridge> bridge,
-            boost::shared_ptr<moba::SignalHandler> sigTerm
+            boost::shared_ptr<Bridge> b,
+            boost::shared_ptr<moba::SignalHandler> s
         );
 
         void run();
