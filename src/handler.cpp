@@ -235,7 +235,7 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
-            case moba::IPC::CMD_ET_DURATION: {
+            case moba::IPC::CMD_SET_DURATION: {
                 LOG(moba::DEBUG) << "set duration... " << std::endl;
                 duration = atoi(msg.mtext);
                 LOG(moba::DEBUG) <<
