@@ -276,11 +276,11 @@ TargetValues Handler::parseMessageData(const std::string &data) {
             case Bridge::RED:
             case Bridge::BLUE:
                 val = atoi(data.substr(pos, found - pos).c_str());
-                if(val < 0) {
-                    val = 0;
+                if(val < Bridge::MIN_VALUE) {
+                    val = Bridge::MIN_VALUE;
                 }
-                if(val > 4095) {
-                    val = 4095;
+                if(val > Bridge::MAX_VALUE) {
+                    val = Bridge::MAX_VALUE;
                 }
                 target.targetIntensity[i] = val;
                 break;
