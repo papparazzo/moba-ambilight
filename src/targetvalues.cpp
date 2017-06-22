@@ -25,7 +25,10 @@
 unsigned int TargetValues::counter = 0;
 
 TargetValues::TargetValues() {
-    targetIntensity = {0, 0, 0, 0};
+    targetIntensity[0] = 0;
+    targetIntensity[1] = 0;
+    targetIntensity[2] = 0;
+    targetIntensity[3] = 0;
     wobble = false;
     direkt = false;
     objNb = counter++;

@@ -38,4 +38,3 @@ class TargetValues {
         static unsigned int counter;
 
 };
-
