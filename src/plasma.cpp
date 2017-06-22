@@ -27,12 +27,26 @@
 
 #define PI 3.1415926535897932384626433832795
 
-Plasma::Plasma(
-    boost::shared_ptr<Bridge> b,
-    boost::shared_ptr<moba::SignalHandler> s
-) {
-    bridge    = b;
-    sigTerm   = s;
+Plasma::Plasma(boost::shared_ptr<Bridge> b) {
+    bridge  = b;
+
+    setAmlitudeAndOffset(Bridge::WHITE,   0, 2000);
+    setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
+    setAmlitudeAndOffset(Bridge::RED,   500,  800);
+    setAmlitudeAndOffset(Bridge::BLUE,  500, 1000);
+}
+
+void Plasma::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
+    if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
+        throw PlasmaException("amplitude and offset to high!");
+    }
+
+    if(offset < Bridge::MIN_VALUE) {
+        throw PlasmaException("amplitude and offset to low!");
+    }
+
+    range[color].amplitude =  amplitude;
+    range[color].offset = offset;
 }
 
 double Plasma::d(int x, double t) {
@@ -43,22 +57,16 @@ double Plasma::d(int x, double t) {
     double b = 1 + std::sin(v * PI + 4 * PI / 3);
 
     // 0 - 2
-    bridge->setPWMlg(Bridge::RED, x, (500 * r + 800));
+    bridge->setPWMlg(Bridge::WHITE, x,  2000);
     bridge->setPWMlg(Bridge::GREEN, x, (500 * g + 2000));
+    bridge->setPWMlg(Bridge::RED, x, (500 * r + 800));
     bridge->setPWMlg(Bridge::BLUE, x, (500 * b + 1000));
 }
 
-void Plasma::run() {
-    int i = 0;
-    bridge->setPWMlg(Bridge::WHITE, 2000);
-    do {
-        if(sigTerm->hasAnySignalTriggered()) {
-            return;
-        }
-        delayMicroseconds(750);
-        i = ++i % 200000;
-        d(0, (double)i * PI / 1000);  //rechts
-        d(1, (double)i * PI / 1000);  //mitte
-        d(2, (double)i * PI / 1000);  //links
-    } while(true);
+void Plasma::next() {
+//    delayMicroseconds(750);
+    counter = ++counter % 200000;
+    d(0, (double)counter * PI / 1000);  //rechts
+    d(1, (double)counter * PI / 1000);  //mitte
+    d(2, (double)counter * PI / 1000);  //links
 }

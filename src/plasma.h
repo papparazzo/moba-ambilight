@@ -23,24 +23,46 @@
 #pragma once
 
 #include "bridge.h"
-#include <moba/signalhandler.h>
 #include <boost/shared_ptr.hpp>
+#include <exception>
+
+class PlasmaException : public std::exception {
+
+    public:
+        virtual ~PlasmaException() throw() {
+        }
+
+        PlasmaException(const std::string &what) {
+            what__ = what;
+        }
+
+        virtual const char* what() const throw() {
+            return what__.c_str();
+        }
+
+    private:
+        std::string what__;
+};
 
 class Plasma {
-    public:
-        Plasma(
-            boost::shared_ptr<Bridge> b,
-            boost::shared_ptr<moba::SignalHandler> s
-        );
 
-        void run();
+    public:
+        Plasma(boost::shared_ptr<Bridge> b);
+
+        void next();
+        void setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset);
 
     private:
         boost::shared_ptr<Bridge> bridge;
-        boost::shared_ptr<moba::SignalHandler> sigTerm;
 
         double d(int x, double t);
-        double d1(int x, double t);
-        double d2(int x, double t);
-        double d3(int x, double t);
+
+        int counter;
+
+        struct Range {
+            int amplitude;
+            int offset;
+        };
+
+        Range range[Bridge::COLOR_COUNT];
 };
