@@ -51,7 +51,7 @@ class BridgeException : public std::exception {
 class Bridge : private boost::noncopyable {
     public:
 
-        static const int MAX_VALUE = 4096;
+        static const int MAX_VALUE = 4095;
         static const int MIN_VALUE = 0;
         static const int COLOR_COUNT = 4; // white, green, red, blue...
 
