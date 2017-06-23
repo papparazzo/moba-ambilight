@@ -70,21 +70,43 @@ class ParseCmdLineException : public std::exception {
 
 void printHelp() {
     std::cout << std::endl;
-    std::cout << "-k, --key       ipc communication-key" << std::endl;
-    std::cout << "-d, --data      [blue];[red];[green];[white];[duration];[wobble{W}]" << std::endl;
-    std::cout << "-a, --action    [EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [HALT] | [CONTINUE] | [RESET] | [TERMINATE]" << std::endl;
+    std::cout <<
+        "-a, --action    " <<
+        "[EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [RUN] | " <<
+        "[HALT] | [CONTINUE] | [RESET] | [TERMINATE] | [INTERRUPT] | " <<
+        "[RESUME] | [SET_DURATION]" << std::endl;
+    std::cout << "-k, --key       ipc communication-key (default: " << moba::IPC::DEFAULT_KEY << ")" << std::endl;
+    std::cout << "-d, --data      [white];[green];[blue];[red];[wobble{W}]" << std::endl;
     std::cout << "-h, --help      shows this help" << std::endl;
     std::cout << "-v, --version   shows version-info" << std::endl;
+
+/*
+    cmd                  data               optional           description
+    ============================================================================
+    EMERGENCY_STOP       [0-4095];[1-100]      X            brightness;duration
+    EMERGENCY_RELEASE
+    TEST
+    RUN
+    HALT
+    CONTINUE
+    RESET
+    TERMINATE
+    INTERRUPT
+    RESUME
+    SET_DURATION
+
+*/
+
 }
 
 bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
     static struct option longOptions[] = {
-        {"key",       required_argument, 0, 'k'},
-        {"data",      required_argument, 0, 'd'},
-        {"action",    required_argument, 0, 'a'},
-        {"help",      no_argument,       0, 'h'},
-        {"version",   no_argument,       0, 'v'},
-        {NULL,        0,              NULL,   0}
+        {"key",       required_argument, 0,    'k'},
+        {"data",      required_argument, 0,    'd'},
+        {"action",    required_argument, 0,    'a'},
+        {"help",      no_argument,       0,    'h'},
+        {"version",   no_argument,       0,    'v'},
+        {NULL,        0,                 NULL, 0  }
     };
 
     int optionIndex = 0;
