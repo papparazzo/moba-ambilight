@@ -65,19 +65,23 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
+        static const int RANGE  = 4095;
+        static const int STEPS  = RANGE * 10;
+
+        static const int EMERGENCY_BRIGTHNESS = 2000;
+        static const int EMERGENCY_DURATION   = 5;
+
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
-        void test();
+        void runTestMode();
+        void runEmergencyMode(const std::string &data);
 
         bool fetchNextMsg();
         TargetValues parseMessageData(const std::string &data);
 
         void setTargetValues(const TargetValues &newValues);
-
-        static const int RANGE  = 4095;
-        static const int STEPS  = RANGE * 10;
 
         bool emergency;
         bool halted;

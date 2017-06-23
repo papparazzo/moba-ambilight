@@ -97,7 +97,7 @@ void Handler::setTargetValues(const TargetValues &newValues) {
     }
 }
 
-void Handler::test() {
+void Handler::runTestMode() {
     bridge->setPWMlg(Bridge::BLUE, 0);
     bridge->setPWMlg(Bridge::GREEN, 0);
     bridge->setPWMlg(Bridge::WHITE, 0);
@@ -122,6 +122,34 @@ void Handler::test() {
     sleep(1);
 }
 
+void Handler::runEmergencyMode(const std::string &data) {
+    TargetValues target;
+    duration = EMERGENCY_DURATION;
+    if(data == "") {
+        target.targetIntensity[Bridge::WHITE] = EMERGENCY_BRIGTHNESS;
+    } else {
+        std::string::size_type pos = 0;
+        std::string::size_type found = data.find(';', pos);
+        int val = atoi(data.substr(pos, found - pos).c_str());
+        if(val < Bridge::MIN_VALUE) {
+            val = Bridge::MIN_VALUE;
+        }
+        if(val > Bridge::MAX_VALUE) {
+            val = Bridge::MAX_VALUE;
+        }
+        target.targetIntensity[Bridge::WHITE] = val;
+        if(found != std::string::npos) {
+            duration = atoi(data.substr(found + 1).c_str());
+        }
+    }
+    LOG(moba::DEBUG) <<
+        "--> targets" <<
+        " white: " << target.targetIntensity[Bridge::WHITE] <<
+        " duration: " << duration << std::endl;
+    setTargetValues(target);
+    emergency = true;
+}
+
 bool Handler::fetchNextMsg() {
     moba::IPC::Message msg;
     TargetValues tmpTarget;
@@ -133,7 +161,7 @@ bool Handler::fetchNextMsg() {
         }
 
         if(!ipc->receive(msg)) {
-            if(emergency || halted) {
+            if(emergency || halted) { // FIXME: Wenn Emergency, dann muss trotzdem gedimmt werden!
                 usleep(50000);
                 continue;
             }
@@ -149,10 +177,7 @@ bool Handler::fetchNextMsg() {
                 }
                 tmpTarget = current;
                 tmpDuration = duration;
-                duration = 5;
-                TargetValues target = parseMessageData(msg.mtext);
-                setTargetValues(target);
-                emergency = true;
+                runEmergencyMode(msg.mtext);
                 break;
             }
 
@@ -161,7 +186,7 @@ bool Handler::fetchNextMsg() {
                 if(!emergency) {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                     break;
-                }
+                } // FIXME: Dimmen in die andere Richtung! d.h. duration zwischen speichern
                 setTargetValues(tmpTarget);
                 duration = tmpDuration;
                 emergency = false;
@@ -186,13 +211,32 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
+
+
+/*
+
+
+                CMD_TEST              = 3,
+                CMD_RUN               = 4,
+                CMD_HALT              = 5,
+                CMD_CONTINUE          = 6,
+                CMD_RESET             = 7,
+                CMD_TERMINATE         = 8,
+                CMD_INTERRUPT         = 9,
+                CMD_RESUME            = 10,
+                CMD_SET_DURATION      = 11,
+                CMD_SHUTDOWN          = 12
+*/
+
+
+
             case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
                 if(emergency || halted) {
                     LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
                     break;
                 }
-                test();
+                runTestMode();
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
                 return true;
             }
@@ -301,12 +345,12 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     }
     LOG(moba::DEBUG) << "--> " << "inserting #" << target.getObjectId() << "..." << std::endl;
     LOG(moba::DEBUG) <<
-            "--> targets" <<
-            " white: " << target.targetIntensity[Bridge::WHITE] <<
-            " green: " << target.targetIntensity[Bridge::GREEN] <<
-            " red: " << target.targetIntensity[Bridge::RED] <<
-            " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
+        "--> targets" <<
+        " white: " << target.targetIntensity[Bridge::WHITE] <<
+        " green: " << target.targetIntensity[Bridge::GREEN] <<
+        " red: " << target.targetIntensity[Bridge::RED] <<
+        " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
     LOG(moba::DEBUG) <<
-            "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
+        "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
     return target;
 }
