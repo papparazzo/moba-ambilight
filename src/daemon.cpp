@@ -51,6 +51,11 @@ int main(int argc, char** argv) {
 
     moba::setCoreFileSizeToULimit();
 
+    if(geteuid() != 0) {
+        LOG(moba::ERROR) << "This daemon can only be run by root user, exiting" << std::endl;
+	    exit(EXIT_FAILURE);
+	}
+
     boost::shared_ptr<Bridge> bridge(new Bridge());
     boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
     boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler());
