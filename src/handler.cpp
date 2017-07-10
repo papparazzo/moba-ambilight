@@ -21,6 +21,8 @@
  */
 
 #include "handler.h"
+#include "plasma.h"
+
 #include <moba/log.h>
 #include <wiringPi.h>
 #include <string.h>
@@ -45,6 +47,26 @@ Handler::Handler(
 void Handler::run() {
     int i = 0;
     fetchNextMsg();
+
+
+    Plasma plasma(bridge);
+    plasma.setAmlitudeAndOffset(Bridge::WHITE, 0, 2000);
+    plasma.setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
+    plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
+    plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
+
+
+
+
+    int i = 0;
+    do {
+        if(sigTerm->hasAnySignalTriggered()) {
+            return;
+        }
+        delayMicroseconds(750);
+        plasma->next();
+    } while(true);
+
 
 
 
@@ -330,17 +352,3 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     return target;
 }
 
-
-/*
-void Plasma::run() {
-    int i = 0;
-    bridge->setPWMlg(Bridge::WHITE, 2000);
-    do {
-        if(sigTerm->hasAnySignalTriggered()) {
-            return;
-        }
-        delayMicroseconds(750);
-        plasma->next();
-    } while(true);
-}
- */
