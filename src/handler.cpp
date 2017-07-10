@@ -44,11 +44,12 @@ Handler::Handler(
 }
 
 void Handler::run() {
-
     int i = 0;
     fetchNextMsg();
 
-/**7
+
+
+/*
      if(!buffer.getItemsCount()) {
         usleep(50000);
         //continue;
@@ -161,7 +162,7 @@ bool Handler::fetchNextMsg() {
         }
 
         if(!ipc->receive(msg)) {
-            if(emergency || halted) { // FIXME: Wenn Emergency, dann muss trotzdem gedimmt werden!
+            if(halted) {
                 usleep(50000);
                 continue;
             }
@@ -279,12 +280,6 @@ bool Handler::fetchNextMsg() {
         }
     }
 }
-
-
-
-
-
-
 
 TargetValues Handler::parseMessageData(const std::string &data) {
     std::string::size_type pos = 0;
