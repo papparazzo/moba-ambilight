@@ -39,7 +39,6 @@ Handler::Handler(
     boost::shared_ptr<moba::SignalHandler> sigTerm
 ) : ipc(ipc), bridge(bridge), sigTerm(sigTerm) {
     emergency   = false;
-    halted      = false;
     interrupted = false;
 }
 
@@ -151,10 +150,11 @@ void Handler::runEmergencyMode(const std::string &data) {
     emergency = true;
 }
 
-bool Handler::fetchNextMsg() {
+void Handler::fetchNextMsg() {
     moba::IPC::Message msg;
     TargetValues tmpTarget;
     int tmpDuration;
+    bool halted = false;
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -162,55 +162,54 @@ bool Handler::fetchNextMsg() {
         }
 
         if(!ipc->receive(msg)) {
-            if(halted) {
-                usleep(50000);
-                continue;
+            if(emergency) {
+                return;
             }
-            return true;
+            if(!halted) {
+                return;
+            }
+            usleep(50000);
+            continue;
         }
 
         switch(msg.mtype) {
-            case moba::IPC::CMD_EMERGENCY_STOP: {
-                LOG(moba::DEBUG) << "emergency..." << std::endl;
-                if(emergency) {
-                    LOG(moba::WARNING) << "emergency already set!" << std::endl;
-                    break;
-                }
-                tmpTarget = current;
-                tmpDuration = duration;
-                runEmergencyMode(msg.mtext);
-                break;
-            }
-
-            case moba::IPC::CMD_EMERGENCY_RELEASE: {
-                LOG(moba::DEBUG) << "emergency... off" << std::endl;
-                if(!emergency) {
-                    LOG(moba::WARNING) << "emergency not set!" << std::endl;
-                    break;
-                } // FIXME: Dimmen in die andere Richtung! d.h. duration zwischen speichern
-                setTargetValues(tmpTarget);
-                duration = tmpDuration;
-                emergency = false;
-                break;
-            }
+//            case moba::IPC::CMD_EMERGENCY_STOP: {
+//                LOG(moba::DEBUG) << "emergency..." << std::endl;
+//                if(emergency) {
+//                    LOG(moba::WARNING) << "emergency already set!" << std::endl;
+//                    break;
+//                }
+//                tmpTarget = current;
+//                tmpDuration = duration;
+//                runEmergencyMode(msg.mtext);
+//                break;
+//            }
+//
+//            case moba::IPC::CMD_EMERGENCY_RELEASE: {
+//                LOG(moba::DEBUG) << "emergency... off" << std::endl;
+//                if(!emergency) {
+//                    LOG(moba::WARNING) << "emergency not set!" << std::endl;
+//                    break;
+//                } // FIXME: Dimmen in die andere Richtung! d.h. duration zwischen speichern
+//                setTargetValues(tmpTarget);
+//                duration = tmpDuration;
+//                emergency = false;
+//                break;
+//            }
 
             case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
-                if(emergency || halted) {
-                    LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
-                    break;
-                }
                 runTestMode();
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
-                return true;
+                return;
             }
 
-            case moba::IPC::CMD_RUN: {
-                LOG(moba::DEBUG) << "run... " << std::endl;
-                regularBuffer.push(parseMessageData(msg.mtext));
-                break;
-            }
-
+//            case moba::IPC::CMD_RUN: {
+//                LOG(moba::DEBUG) << "run... " << std::endl;
+//                regularBuffer.push(parseMessageData(msg.mtext));
+//                break;
+//            }
+//
             case moba::IPC::CMD_HALT: {
                 LOG(moba::DEBUG) << "halt..." << std::endl;
                 if(halted) {
@@ -228,55 +227,55 @@ bool Handler::fetchNextMsg() {
                 halted = false;
                 break;
             }
-
-            case moba::IPC::CMD_RESET: {
-                LOG(moba::DEBUG) << "reset... " << std::endl;
-                interruptBuffer.reset();
-                regularBuffer.reset();
-                emergency = false;
-                halted = false;
-                interrupted = false;
-                bridge->setAllOff();
-                // FIXME: delete Target ???
-                break;
-            }
-
+//
+//            case moba::IPC::CMD_RESET: {
+//                LOG(moba::DEBUG) << "reset... " << std::endl;
+//                interruptBuffer.reset();
+//                regularBuffer.reset();
+//                emergency = false;
+//                halted = false;
+//                interrupted = false;
+//                bridge->setAllOff();
+//                // FIXME: delete Target ???
+//                break;
+//            }
+//
             case moba::IPC::CMD_TERMINATE: {
                 LOG(moba::DEBUG) << "terminate... " << std::endl;
                 throw HandlerException("terminate received");
             }
 
-            case moba::IPC::CMD_INTERRUPT: {
-                LOG(moba::DEBUG) << "interrupt... " << std::endl;
-                interrupted = true;
-                interruptBuffer.push(parseMessageData(msg.mtext));
-                break;
-            }
-
-            case moba::IPC::CMD_RESUME: {
-                LOG(moba::DEBUG) << "resume... " << std::endl;
-                interruptBuffer.reset();
-                interrupted = false;
-                // TODO: goto default target
-                break;
-            }
-
-            case moba::IPC::CMD_SET_DURATION: {
-                LOG(moba::DEBUG) << "set duration... " << std::endl;
-                duration = atoi(msg.mtext);
-                LOG(moba::DEBUG) <<
-                    "--> duration: ~" << duration <<
-                    " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
-                duration = static_cast<int>((duration * 1000 * 1000) / Handler::STEPS);
-                break;
-            }
-
+//            case moba::IPC::CMD_INTERRUPT: {
+//                LOG(moba::DEBUG) << "interrupt... " << std::endl;
+//                interrupted = true;
+//                interruptBuffer.push(parseMessageData(msg.mtext));
+//                break;
+//            }
+//
+//            case moba::IPC::CMD_RESUME: {
+//                LOG(moba::DEBUG) << "resume... " << std::endl;
+//                interruptBuffer.reset();
+//                interrupted = false;
+//                // TODO: goto default target
+//                break;
+//            }
+//
+//            case moba::IPC::CMD_SET_DURATION: {
+//                LOG(moba::DEBUG) << "set duration... " << std::endl;
+//                duration = atoi(msg.mtext);
+//                LOG(moba::DEBUG) <<
+//                    "--> duration: ~" << duration <<
+//                    " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
+//                duration = static_cast<int>((duration * 1000 * 1000) / Handler::STEPS);
+//                break;
+//            }
+//
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
         }
-        if(!emergency && !halted) {
-            return true;
+        if(!halted || emergency) {
+            return;
         }
     }
 }
