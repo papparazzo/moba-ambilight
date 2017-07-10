@@ -56,8 +56,6 @@ void Handler::run() {
     plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
 
 
-
-
     int i = 0;
     do {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -66,8 +64,6 @@ void Handler::run() {
         delayMicroseconds(750);
         plasma->next();
     } while(true);
-
-
 
 
 /*
@@ -83,6 +79,7 @@ void Handler::run() {
 
 
     do {
+        fetchNextMsg();
         delayMicroseconds(duration);
         for(int j = 0; j < 4; ++j) {
             if(!step[j] || i % step[j]) {
@@ -108,7 +105,7 @@ void Handler::run() {
 
 void Handler::setTargetValues(const TargetValues &newValues) {
     for(int i = 0; i < 4; ++i) {
-        if(!duration || newValues.direkt) {
+        if(!duration || !newValues.duration) {
             current.targetIntensity[i] = newValues.targetIntensity[i];
             bridge->setPWMlg(Handler::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
@@ -333,7 +330,7 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                         break;
 
                     case 'D':
-                        target.direkt = true;
+                        target.duration = 0;
                         break;
                 }
                 break;
