@@ -42,6 +42,7 @@ Handler::Handler(
 ) : ipc(ipc), bridge(bridge), sigTerm(sigTerm) {
     emergency   = false;
     interrupted = false;
+    duration = DEFAULT_DURATION;
 }
 
 void Handler::run() {
@@ -80,7 +81,7 @@ void Handler::run() {
 
     do {
         fetchNextMsg();
-        delayMicroseconds(duration);
+        delayMicroseconds(current.duration);
         for(int j = 0; j < 4; ++j) {
             if(!step[j] || i % step[j]) {
                 continue;
@@ -306,7 +307,7 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     TargetValues target;
     int val;
 
-    for(int i = 0; i < 5; ++i) {
+    for(int i = 0; i < 6; ++i) {
         found = data.find(';', pos);
         switch(i) {
             case Bridge::WHITE:
@@ -322,15 +323,18 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                 }
                 target.targetIntensity[i] = val;
                 break;
-
             case 5:
+                val = atoi(data.substr(pos, found - pos).c_str());
+                if(val == -1) {
+                    target.duration = duration;
+                } else {
+                    target.duration = val;
+                }
+
+            case 6:
                 switch(data.substr(pos, found - pos)[0]) {
                     case 'W':
                         target.wobble = true;
-                        break;
-
-                    case 'D':
-                        target.duration = 0;
                         break;
                 }
                 break;
