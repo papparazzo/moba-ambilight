@@ -193,6 +193,23 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
+            case moba::IPC::CMD_TEST: {
+                LOG(moba::DEBUG) << "testing... " << std::endl;
+                if(emergency || halted) {
+                    LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
+                    break;
+                }
+                runTestMode();
+                LOG(moba::DEBUG) << "testing... finished!" << std::endl;
+                return true;
+            }
+
+            case moba::IPC::CMD_RUN: {
+                LOG(moba::DEBUG) << "run... " << std::endl;
+                regularBuffer.push(parseMessageData(msg.mtext));
+                break;
+            }
+
             case moba::IPC::CMD_HALT: {
                 LOG(moba::DEBUG) << "halt..." << std::endl;
                 if(halted) {
@@ -211,41 +228,6 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
-
-
-/*
-
-
-                CMD_TEST              = 3,
-                CMD_RUN               = 4,
-                CMD_HALT              = 5,
-                CMD_CONTINUE          = 6,
-                CMD_RESET             = 7,
-                CMD_TERMINATE         = 8,
-                CMD_INTERRUPT         = 9,
-                CMD_RESUME            = 10,
-                CMD_SET_DURATION      = 11,
-                CMD_SHUTDOWN          = 12
-*/
-
-
-
-            case moba::IPC::CMD_TEST: {
-                LOG(moba::DEBUG) << "testing... " << std::endl;
-                if(emergency || halted) {
-                    LOG(moba::WARNING) << "no testing! Emergency or halted set" << std::endl;
-                    break;
-                }
-                runTestMode();
-                LOG(moba::DEBUG) << "testing... finished!" << std::endl;
-                return true;
-            }
-
-            case moba::IPC::CMD_TERMINATE: {
-                LOG(moba::DEBUG) << "terminate... " << std::endl;
-                throw HandlerException("terminate received");
-            }
-
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
                 interruptBuffer.reset();
@@ -258,10 +240,9 @@ bool Handler::fetchNextMsg() {
                 break;
             }
 
-            case moba::IPC::CMD_RUN: {
-                LOG(moba::DEBUG) << "run... " << std::endl;
-                regularBuffer.push(parseMessageData(msg.mtext));
-                break;
+            case moba::IPC::CMD_TERMINATE: {
+                LOG(moba::DEBUG) << "terminate... " << std::endl;
+                throw HandlerException("terminate received");
             }
 
             case moba::IPC::CMD_INTERRUPT: {
