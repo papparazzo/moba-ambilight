@@ -50,20 +50,6 @@ void Handler::run() {
     fetchNextMsg();
 
 
-    Plasma plasma(bridge);
-    plasma.setAmlitudeAndOffset(Bridge::WHITE, 0, 2000);
-    plasma.setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
-    plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
-    plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
-
-    int i = 0;
-    do {
-        if(sigTerm->hasAnySignalTriggered()) {
-            return;
-        }
-        delayMicroseconds(750);
-        plasma->next();
-    } while(true);
 
 /*
      if(!buffer.getItemsCount()) {
@@ -71,15 +57,42 @@ void Handler::run() {
         //continue;
     }
 
-    //TargetValues target = buffer.pop();
+
     TargetValues target;
 
  */
+// FIXME: Hold for x seconds???
 
+    if(!regularBuffer.hasItems()) {
+        continue;
+    }
+
+    TargetValues target = regularBuffer.pop();
+
+    if(target.direkt) {
+        continue;
+    }
+
+    if(target.wobble) {
+        Plasma plasma(bridge);
+        plasma.setAmlitudeAndOffset(Bridge::WHITE, 0, 2000);
+        plasma.setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
+        plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
+        plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
+
+        do {
+            if(sigTerm->hasAnySignalTriggered()) {
+                return;
+            }
+            delayMicroseconds(duration + current.duration);
+            plasma->next();
+        } while(true);
+
+    }
 
     do {
         fetchNextMsg();
-        delayMicroseconds(current.duration);
+        delayMicroseconds(duration + current.duration);
         for(int j = 0; j < 4; ++j) {
             if(!step[j] || i % step[j]) {
                 continue;
@@ -98,6 +111,8 @@ void Handler::run() {
         if(i) {
             continue;
         }
+
+
 
     } while(true);
 }
@@ -224,7 +239,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
-//                regularBuffer.push(parseMessageData(msg.mtext));
+                regularBuffer.push(parseMessageData(msg.mtext));
                 break;
             }
 
@@ -248,12 +263,12 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
+                regularBuffer.reset();
 //                interruptBuffer.reset();
-//                regularBuffer.reset();
-//                emergency = false;
-//                halted = false;
+                emergency = false;
+                halted = false;
 //                interrupted = false;
-//                bridge->setAllOff();
+                bridge->setAllOff();
 //                // FIXME: delete Target ???
                 break;
             }
@@ -323,12 +338,8 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                 break;
 
             case 5:
-                val = atoi(data.substr(pos, found - pos).c_str());
-                if(val == -1) {
-                    target.duration = duration;
-                } else {
-                    target.duration = val;
-                }
+                target.duration = atoi(data.substr(pos, found - pos).c_str());
+                break;
 
             case 6:
                 switch(data.substr(pos, found - pos)[0]) {
@@ -353,6 +364,8 @@ TargetValues Handler::parseMessageData(const std::string &data) {
         " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
     LOG(moba::DEBUG) <<
         "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
+    LOG(moba::DEBUG) <<
+        "--> direkt: " << (target.direkt ? "on" : "off") << std::endl;
     return target;
 }
 
