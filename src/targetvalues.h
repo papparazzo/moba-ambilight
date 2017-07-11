@@ -30,6 +30,7 @@ class TargetValues {
         int targetIntensity[4];
         int duration;
         bool wobble;
+        bool direkt;
 
         unsigned int getObjectId() const;
 

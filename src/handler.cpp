@@ -56,7 +56,6 @@ void Handler::run() {
     plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
     plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
 
-
     int i = 0;
     do {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -65,7 +64,6 @@ void Handler::run() {
         delayMicroseconds(750);
         plasma->next();
     } while(true);
-
 
 /*
      if(!buffer.getItemsCount()) {
@@ -106,7 +104,7 @@ void Handler::run() {
 
 void Handler::setTargetValues(const TargetValues &newValues) {
     for(int i = 0; i < 4; ++i) {
-        if(!duration || !newValues.duration) {
+        if(!duration || newValues.direkt) {
             current.targetIntensity[i] = newValues.targetIntensity[i];
             bridge->setPWMlg(Handler::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
@@ -323,6 +321,7 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                 }
                 target.targetIntensity[i] = val;
                 break;
+
             case 5:
                 val = atoi(data.substr(pos, found - pos).c_str());
                 if(val == -1) {
@@ -335,6 +334,10 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                 switch(data.substr(pos, found - pos)[0]) {
                     case 'W':
                         target.wobble = true;
+                        break;
+
+                    case 'D':
+                        target.direkt = true;
                         break;
                 }
                 break;
