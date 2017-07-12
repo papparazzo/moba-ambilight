@@ -1,4 +1,3 @@
-#include "plasma.h"
 /*
  *  Project:    moba-ambilight
  *
@@ -24,6 +23,7 @@
 #include <cmath>
 #include <iostream>
 #include <wiringPi.h>
+#include "plasma.h"
 
 #define PI 3.1415926535897932384626433832795
 

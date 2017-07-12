@@ -27,6 +27,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "bridge.h"
+#include "targetvalues.h"
 
 class ControllerException : public std::exception {
 
@@ -52,7 +53,11 @@ class Controller : private boost::noncopyable {
         Controller(boost::shared_ptr<Bridge> b);
         virtual ~Controller();
 
+        void setNextTarget(const TargetValues &newValues);
         bool nextStep();
+
+        //void setDuration(int duration);
+        //void reset();
 
     private:
 

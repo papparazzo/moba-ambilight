@@ -83,8 +83,6 @@ class Handler : private boost::noncopyable {
         void fetchNextMsg();
         TargetValues parseMessageData(const std::string &data);
 
-        void setTargetValues(const TargetValues &newValues);
-
         bool emergency;
         bool interrupted;
 

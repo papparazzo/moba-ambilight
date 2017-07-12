@@ -69,65 +69,6 @@ void Handler::run() {
 
     TargetValues target = regularBuffer.pop();
 
-    if(target.direkt) {
-        continue;
-    }
-
-    if(target.wobble) {
-        Plasma plasma(bridge);
-        plasma.setAmlitudeAndOffset(Bridge::WHITE, 0, 2000);
-        plasma.setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
-        plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
-        plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
-
-        do {
-            if(sigTerm->hasAnySignalTriggered()) {
-                return;
-            }
-            delayMicroseconds(duration + current.duration);
-            plasma->next();
-        } while(true);
-
-    }
-
-    do {
-        fetchNextMsg();
-        delayMicroseconds(duration + current.duration);
-        for(int j = 0; j < 4; ++j) {
-            if(!step[j] || i % step[j]) {
-                continue;
-            }
-            if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
-                current.targetIntensity[j]++;
-            }
-            if(step[j] < 0 && current.targetIntensity[j] > 0) {
-                current.targetIntensity[j]--;
-            }
-            bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
-        }
-
-        i = i++ % Handler::STEPS;
-
-        if(i) {
-            continue;
-        }
-
-
-
-    } while(true);
-}
-
-void Handler::setTargetValues(const TargetValues &newValues) {
-    for(int i = 0; i < 4; ++i) {
-        if(!duration || newValues.direkt) {
-            current.targetIntensity[i] = newValues.targetIntensity[i];
-            bridge->setPWMlg(Handler::bcolor[i], current.targetIntensity[i]);
-        } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
-            step[i] = Handler::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
-        } else {
-            step[i] = 0;
-        }
-    }
 }
 
 void Handler::runTestMode() {
@@ -368,4 +309,3 @@ TargetValues Handler::parseMessageData(const std::string &data) {
         "--> direkt: " << (target.direkt ? "on" : "off") << std::endl;
     return target;
 }
-
