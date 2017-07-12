@@ -1,5 +1,5 @@
 bin_PROGRAMS = moba-ambilight moba-ambilightd
-moba_ambilightd_SOURCES = daemon.cpp bridge.cpp handler.cpp plasma.cpp targetvalues.cpp
+moba_ambilightd_SOURCES = daemon.cpp bridge.cpp handler.cpp plasma.cpp targetvalues.cpp controller.cpp
 moba_ambilightd_LDADD = -lwiringPi /usr/local/lib/libMoBaCommon.a
 
 moba_ambilight_SOURCES = client.cpp
