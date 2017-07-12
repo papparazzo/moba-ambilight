@@ -79,24 +79,20 @@ void printHelp() {
     std::cout << "-d, --data      [white];[green];[blue];[red];[wobble{W}]" << std::endl;
     std::cout << "-h, --help      shows this help" << std::endl;
     std::cout << "-v, --version   shows version-info" << std::endl;
-
-/*
-    cmd                  data               optional           description
-    ============================================================================
-    EMERGENCY_STOP       [0-4095];[1-100]      X            brightness;duration
-    EMERGENCY_RELEASE
-    TEST
-    RUN
-    HALT
-    CONTINUE
-    RESET
-    TERMINATE
-    INTERRUPT
-    RESUME
-    SET_DURATION
-
-*/
-
+    std::cout << std::endl << std::endl << std::endl;
+    std::cout << "action               data               optional           description       " << std::endl;
+    std::cout << "============================================================================ " << std::endl;
+    std::cout << "EMERGENCY_STOP       [0-4095];[1-100]      X            brightness;duration  " << std::endl;
+    std::cout << "EMERGENCY_RELEASE    -                     -                                 " << std::endl;
+    std::cout << "TEST                 -                     -                                 " << std::endl;
+    std::cout << "RUN                  -                     -                                 " << std::endl;
+    std::cout << "HALT                 -                     -                                 " << std::endl;
+    std::cout << "CONTINUE             -                     -                                 " << std::endl;
+    std::cout << "RESET                                                                        " << std::endl;
+    std::cout << "TERMINATE                                                                    " << std::endl;
+    std::cout << "INTERRUPT                                                                    " << std::endl;
+    std::cout << "RESUME                                                                       " << std::endl;
+    std::cout << "SET_DURATION                                                                 " << std::endl;
 }
 
 bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
