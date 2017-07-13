@@ -26,7 +26,6 @@
 
 #include "bridge.h"
 #include "handler.h"
-#include "plasma.h"
 
 
 #include <moba/ipc.h>

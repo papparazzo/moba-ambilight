@@ -33,7 +33,8 @@
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
-#include <moba/ringbuffer.h>
+
+#include "controller.h"
 
 class HandlerException : public std::exception {
 
@@ -65,15 +66,8 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        static const int RANGE  = 4095;
-        static const int STEPS  = RANGE * 10;
-
-        static const int EMERGENCY_BRIGTHNESS = 2000;
-        static const int EMERGENCY_DURATION   = 5;
-
-        static const int DEFAULT_DURATION     = 0;
-
         boost::shared_ptr<Bridge> bridge;
+        boost::shared_ptr<Controller> controller;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
@@ -86,13 +80,8 @@ class Handler : private boost::noncopyable {
         bool emergency;
         bool interrupted;
 
-        int duration;
-
         TargetValues current;
         int step[4];
 
         const static Bridge::BankColor bcolor[];
-
-        moba::Ringbuffer<TargetValues> regularBuffer;
-        moba::Ringbuffer<TargetValues> interruptBuffer;
 };

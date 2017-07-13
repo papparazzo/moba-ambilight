@@ -21,7 +21,6 @@
  */
 
 #include "handler.h"
-#include "plasma.h"
 
 #include <moba/log.h>
 #include <wiringPi.h>
@@ -39,7 +38,7 @@ Handler::Handler(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), bridge(bridge), sigTerm(sigTerm) {
+) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), controller(new Controller(bridge)){
     emergency   = false;
     interrupted = false;
     duration = DEFAULT_DURATION;
@@ -49,26 +48,13 @@ void Handler::run() {
     int i = 0;
     fetchNextMsg();
 
-
-
-/*
-     if(!buffer.getItemsCount()) {
+    do {
+     if(!controller->next()) {
         usleep(50000);
         //continue;
     }
 
-
-    TargetValues target;
-
- */
-// FIXME: Hold for x seconds???
-
-    if(!regularBuffer.hasItems()) {
-        continue;
-    }
-
-    TargetValues target = regularBuffer.pop();
-
+    } while(true);
 }
 
 void Handler::runTestMode() {
@@ -120,7 +106,7 @@ void Handler::runEmergencyMode(const std::string &data) {
         "--> targets" <<
         " white: " << target.targetIntensity[Bridge::WHITE] <<
         " duration: " << duration << std::endl;
-    setTargetValues(target);
+    controller->setNextTarget(target);
     emergency = true;
 }
 
@@ -204,8 +190,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
-                regularBuffer.reset();
-//                interruptBuffer.reset();
+                controller->reset();
                 emergency = false;
                 halted = false;
 //                interrupted = false;
@@ -240,7 +225,7 @@ void Handler::fetchNextMsg() {
                 LOG(moba::DEBUG) <<
                     "--> duration: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
-                duration = static_cast<int>((duration * 1000 * 1000) / Handler::STEPS);
+                controller->setDuration(duration);
                 break;
             }
 

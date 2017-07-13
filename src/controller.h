@@ -29,6 +29,8 @@
 #include "bridge.h"
 #include "targetvalues.h"
 
+#include <moba/ringbuffer.h>
+
 class ControllerException : public std::exception {
 
     public:
@@ -54,13 +56,29 @@ class Controller : private boost::noncopyable {
         virtual ~Controller();
 
         void setNextTarget(const TargetValues &newValues);
-        bool nextStep();
-
-        //void setDuration(int duration);
-        //void reset();
+        bool next();
+        void reset();
+        void setDuration(int duration);
 
     private:
+
+        static const int RANGE  = 4095;
+        static const int STEPS  = RANGE * 10;
+
+        static const int EMERGENCY_BRIGTHNESS = 2000;
+        static const int EMERGENCY_DURATION   = 5;
+
+        static const int DEFAULT_DURATION     = 0;
+
+
+        int duration;
+
+
         boost::shared_ptr<Bridge> bridge;
+
+        moba::Ringbuffer<TargetValues> regularBuffer;
+        moba::Ringbuffer<TargetValues> interruptBuffer;
+
 
 };
 
@@ -69,7 +87,7 @@ class Plasma {
 
     public:
 
-        void next();
+
         void setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset);
 
     private:

@@ -58,7 +58,24 @@ void Controller::setNextTarget(const TargetValues &newValues) {
 }
 
 
-bool Controller::nextStep() {
+bool Controller::next() {
+
+
+
+/*
+
+
+    TargetValues target;
+
+ */
+// FIXME: Hold for x seconds???
+
+    if(!regularBuffer.hasItems()) {
+        return false;
+    }
+
+    TargetValues target = regularBuffer.pop();
+
 /*
 
     if(target.direkt) {
@@ -111,8 +128,16 @@ bool Controller::nextStep() {
 }
 
 
+void Controller::reset() {
+    regularBuffer.reset();
+//                interruptBuffer.reset();
+
+}
 
 
+void Controller::setDuration(int d) {
+    duration = static_cast<int>((d * 1000 * 1000) / Controller::STEPS);
+}
 
 void Plasma::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
