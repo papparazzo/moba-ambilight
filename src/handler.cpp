@@ -27,87 +27,26 @@
 #include <string.h>
 #include <sys/time.h>
 
-const Bridge::BankColor Handler::bcolor[] = {
-    Bridge::BLUE,
-    Bridge::GREEN,
-    Bridge::RED,
-    Bridge::WHITE
-};
-
 Handler::Handler(
-    boost::shared_ptr<Bridge> bridge,
+    boost::shared_ptr<Controller> controller,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), controller(new Controller(bridge)){
+) : ipc(ipc), sigTerm(sigTerm), controller(controller){
     emergency   = false;
     interrupted = false;
-    duration = DEFAULT_DURATION;
 }
 
 void Handler::run() {
     int i = 0;
-    fetchNextMsg();
 
     do {
-     if(!controller->next()) {
-        usleep(50000);
-        //continue;
-    }
+        fetchNextMsg();
+        if(!controller->next()) {
+            usleep(50000);
+            continue;
+        }
 
     } while(true);
-}
-
-void Handler::runTestMode() {
-    bridge->setPWMlg(Bridge::BLUE, 0);
-    bridge->setPWMlg(Bridge::GREEN, 0);
-    bridge->setPWMlg(Bridge::WHITE, 0);
-    bridge->setPWMlg(Bridge::RED, 211);
-    sleep(1);
-    bridge->setPWMlg(Bridge::RED, 0);
-    for(int i = 0; i < 4; ++i) {
-        for(int j = 0; j < 4; ++j) {
-            LOG(moba::DEBUG) << "bank: " << i << " color: " << bridge->getColorName(Handler::bcolor[j]) << std::endl;
-            for(int k = 0; k < 2; ++k) {
-                bridge->setData(Handler::bcolor[j], i, 0, 150);
-                delay(500);
-                bridge->setData(Handler::bcolor[j], i, 0, 600);
-                delay(500);
-            }
-            bridge->setData(Handler::bcolor[j], i, 0, 0);
-        }
-    }
-    bridge->setPWMlg(Bridge::GREEN, 211);
-    sleep(1);
-    bridge->setAllOff();
-    sleep(1);
-}
-
-void Handler::runEmergencyMode(const std::string &data) {
-    TargetValues target;
-    duration = EMERGENCY_DURATION;
-    if(data == "") {
-        target.targetIntensity[Bridge::WHITE] = EMERGENCY_BRIGTHNESS;
-    } else {
-        std::string::size_type pos = 0;
-        std::string::size_type found = data.find(';', pos);
-        int val = atoi(data.substr(pos, found - pos).c_str());
-        if(val < Bridge::MIN_VALUE) {
-            val = Bridge::MIN_VALUE;
-        }
-        if(val > Bridge::MAX_VALUE) {
-            val = Bridge::MAX_VALUE;
-        }
-        target.targetIntensity[Bridge::WHITE] = val;
-        if(found != std::string::npos) {
-            duration = atoi(data.substr(found + 1).c_str());
-        }
-    }
-    LOG(moba::DEBUG) <<
-        "--> targets" <<
-        " white: " << target.targetIntensity[Bridge::WHITE] <<
-        " duration: " << duration << std::endl;
-    controller->setNextTarget(target);
-    emergency = true;
 }
 
 void Handler::fetchNextMsg() {
@@ -159,14 +98,14 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
-                runTestMode();
+                controller->runTestMode();
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
                 return;
             }
 
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
-                regularBuffer.push(parseMessageData(msg.mtext));
+                controller->setNewTarget(parseMessageData(msg.mtext), false);
                 break;
             }
 
@@ -194,7 +133,7 @@ void Handler::fetchNextMsg() {
                 emergency = false;
                 halted = false;
 //                interrupted = false;
-                bridge->setAllOff();
+
 //                // FIXME: delete Target ???
                 break;
             }
@@ -206,8 +145,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_INTERRUPT: {
                 LOG(moba::DEBUG) << "interrupt... " << std::endl;
-//                interrupted = true;
-//                interruptBuffer.push(parseMessageData(msg.mtext));
+                controller->setNewTarget(parseMessageData(msg.mtext), true);
                 break;
             }
 
@@ -221,7 +159,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_SET_DURATION: {
                 LOG(moba::DEBUG) << "set duration... " << std::endl;
-                duration = atoi(msg.mtext);
+                int duration = atoi(msg.mtext);
                 LOG(moba::DEBUG) <<
                     "--> duration: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
@@ -291,6 +229,6 @@ TargetValues Handler::parseMessageData(const std::string &data) {
     LOG(moba::DEBUG) <<
         "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
     LOG(moba::DEBUG) <<
-        "--> direkt: " << (target.direkt ? "on" : "off") << std::endl;
+        "--> direct: " << (target.direkt ? "on" : "off") << std::endl;
     return target;
 }

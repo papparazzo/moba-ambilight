@@ -26,10 +26,19 @@
 
 namespace {
     const double PI = 3.1415926535897932384626433832795;
+    const Bridge::BankColor Controller::bcolor[] = {
+        Bridge::BLUE,
+        Bridge::GREEN,
+        Bridge::RED,
+        Bridge::WHITE
+    };
 }
+
+
 
 Controller::Controller(boost::shared_ptr<Bridge> b) {
     bridge  = b;
+    duration = DEFAULT_DURATION;
 /*
     setAmlitudeAndOffset(Bridge::WHITE,   0, 2000);
     setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
@@ -127,11 +136,73 @@ bool Controller::next() {
  **/
 }
 
+void Controller::runTestMode() {
+    bridge->setPWMlg(Bridge::BLUE, 0);
+    bridge->setPWMlg(Bridge::GREEN, 0);
+    bridge->setPWMlg(Bridge::WHITE, 0);
+    bridge->setPWMlg(Bridge::RED, 211);
+    sleep(1);
+    bridge->setPWMlg(Bridge::RED, 0);
+    for(int i = 0; i < 4; ++i) {
+        for(int j = 0; j < 4; ++j) {
+            for(int k = 0; k < 2; ++k) {
+                bridge->setData(Controller::bcolor[j], i, 0, 150);
+                delay(500);
+                bridge->setData(Controller::bcolor[j], i, 0, 600);
+                delay(500);
+            }
+            bridge->setData(Controller::bcolor[j], i, 0, 0);
+        }
+    }
+    bridge->setPWMlg(Bridge::GREEN, 211);
+    sleep(1);
+    bridge->setAllOff();
+    sleep(1);
+}
+
 
 void Controller::reset() {
     regularBuffer.reset();
+    bridge->setAllOff();
 //                interruptBuffer.reset();
 
+}
+
+void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
+    if(!immediately) {
+        regularBuffer.push(newValues);
+        return;
+    }
+}
+
+
+
+void Controller::runEmergencyMode(const std::string &data) {
+    TargetValues target;
+    duration = EMERGENCY_DURATION;
+    if(data == "") {
+        target.targetIntensity[Bridge::WHITE] = EMERGENCY_BRIGTHNESS;
+    } else {
+        std::string::size_type pos = 0;
+        std::string::size_type found = data.find(';', pos);
+        int val = atoi(data.substr(pos, found - pos).c_str());
+        if(val < Bridge::MIN_VALUE) {
+            val = Bridge::MIN_VALUE;
+        }
+        if(val > Bridge::MAX_VALUE) {
+            val = Bridge::MAX_VALUE;
+        }
+        target.targetIntensity[Bridge::WHITE] = val;
+        if(found != std::string::npos) {
+            duration = atoi(data.substr(found + 1).c_str());
+        }
+    }
+    LOG(moba::DEBUG) <<
+        "--> targets" <<
+        " white: " << target.targetIntensity[Bridge::WHITE] <<
+        " duration: " << duration << std::endl;
+    controller->setNextTarget(target);
+    emergency = true;
 }
 
 

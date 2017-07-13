@@ -28,7 +28,6 @@
 #include <string>
 #include <exception>
 
-#include "bridge.h"
 #include "targetvalues.h"
 
 #include <moba/ipc.h>
@@ -58,7 +57,7 @@ class HandlerException : public std::exception {
 class Handler : private boost::noncopyable {
     public:
         Handler(
-            boost::shared_ptr<Bridge> bridge,
+            boost::shared_ptr<Controller> controller,
             boost::shared_ptr<moba::IPC> ipc,
             boost::shared_ptr<moba::SignalHandler> sigTerm
         );
@@ -66,22 +65,13 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<Controller> controller;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
-
-        void runTestMode();
-        void runEmergencyMode(const std::string &data);
 
         void fetchNextMsg();
         TargetValues parseMessageData(const std::string &data);
 
         bool emergency;
         bool interrupted;
-
-        TargetValues current;
-        int step[4];
-
-        const static Bridge::BankColor bcolor[];
 };

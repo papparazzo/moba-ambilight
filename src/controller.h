@@ -55,12 +55,16 @@ class Controller : private boost::noncopyable {
         Controller(boost::shared_ptr<Bridge> b);
         virtual ~Controller();
 
-        void setNextTarget(const TargetValues &newValues);
+        void setNewTarget(const TargetValues &newValues, bool immediately);
+        //void runEmergencyMode(const std::string &data);
         bool next();
         void reset();
         void setDuration(int duration);
+        void runTestMode();
 
     private:
+
+        void setNextTarget(const TargetValues &newValues);
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;
@@ -69,6 +73,12 @@ class Controller : private boost::noncopyable {
         static const int EMERGENCY_DURATION   = 5;
 
         static const int DEFAULT_DURATION     = 0;
+
+
+        TargetValues current;
+        int step[4];
+
+        const static Bridge::BankColor bcolor[];
 
 
         int duration;
