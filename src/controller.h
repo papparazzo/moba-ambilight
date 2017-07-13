@@ -60,7 +60,29 @@ class Controller : private boost::noncopyable {
         //void reset();
 
     private:
+        boost::shared_ptr<Bridge> bridge;
 
 };
 
 
+class Plasma {
+
+    public:
+
+        void next();
+        void setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset);
+
+    private:
+
+
+        double d(int x, double t);
+
+        int counter;
+
+        struct Range {
+            int amplitude;
+            int offset;
+        };
+
+        Range range[Bridge::COLOR_COUNT];
+};
