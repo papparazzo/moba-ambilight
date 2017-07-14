@@ -66,9 +66,28 @@ void Controller::setNextTarget(const TargetValues &newValues) {
  */
 }
 
+void Controller::resume() {
+
+}
+
+void Controller::emergencyStop() {
+
+}
+
+void Controller::emergencyStop(const TargetValues &val) {
+
+}
+
+void Controller::releaseEmergencyStop() {
+
+}
+
+
+TargetValues Controller::prefetch(int step) {
+
+}
 
 bool Controller::next() {
-
 
 
 /*

@@ -61,10 +61,17 @@ class Controller : private boost::noncopyable {
         void reset();
         void setDuration(int duration);
         void runTestMode();
+        void resume();
+
+        void emergencyStop();
+        void emergencyStop(const TargetValues &val);
+        void releaseEmergencyStop();
 
     private:
 
         void setNextTarget(const TargetValues &newValues);
+
+        TargetValues prefetch(int step = 0);
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;
