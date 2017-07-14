@@ -69,9 +69,12 @@ class Handler : private boost::noncopyable {
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
+        static const int EMERGENCY_BRIGTHNESS = 2000;
+        static const int EMERGENCY_DURATION   = 5;
+
         void fetchNextMsg();
+        void runEmergencyMode(const std::string &data);
         TargetValues parseMessageData(const std::string &data);
 
         bool emergency;
-        bool interrupted;
 };

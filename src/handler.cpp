@@ -31,9 +31,7 @@ Handler::Handler(
     boost::shared_ptr<Controller> controller,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), sigTerm(sigTerm), controller(controller){
-    emergency   = false;
-    interrupted = false;
+) : ipc(ipc), sigTerm(sigTerm), controller(controller), emergency(false) {
 }
 
 void Handler::run() {
@@ -52,7 +50,6 @@ void Handler::run() {
 void Handler::fetchNextMsg() {
     moba::IPC::Message msg;
     TargetValues tmpTarget;
-    int tmpDuration;
     bool halted = false;
 
     while(true) {
@@ -78,9 +75,8 @@ void Handler::fetchNextMsg() {
                     LOG(moba::WARNING) << "emergency already set!" << std::endl;
                     break;
                 }
-//                tmpTarget = current;
-//                tmpDuration = duration;
-//                runEmergencyMode(msg.mtext);
+                runEmergencyMode(msg.mtext);
+                emergency = true;
                 break;
             }
 
@@ -89,10 +85,9 @@ void Handler::fetchNextMsg() {
                 if(!emergency) {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                     break;
-                } // FIXME: Dimmen in die andere Richtung! d.h. duration zwischen speichern
-//                setTargetValues(tmpTarget);
-//                duration = tmpDuration;
-//                emergency = false;
+                }
+                controller->releaseEmergencyStop();
+                emergency = false;
                 break;
             }
 
@@ -132,9 +127,6 @@ void Handler::fetchNextMsg() {
                 controller->reset();
                 emergency = false;
                 halted = false;
-//                interrupted = false;
-
-//                // FIXME: delete Target ???
                 break;
             }
 
@@ -151,9 +143,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESUME: {
                 LOG(moba::DEBUG) << "resume... " << std::endl;
-//                interruptBuffer.reset();
-//                interrupted = false;
-//                // TODO: goto default target
+                controller->resume();
                 break;
             }
 
@@ -175,6 +165,31 @@ void Handler::fetchNextMsg() {
             return;
         }
     }
+}
+
+void Handler::runEmergencyMode(const std::string &data) {
+    int duration = EMERGENCY_DURATION;
+    int brigthness = EMERGENCY_BRIGTHNESS;
+
+    if(data != "") {
+        std::string::size_type pos = 0;
+        std::string::size_type found = data.find(';', pos);
+        int val = atoi(data.substr(pos, found - pos).c_str());
+        if(val < Bridge::MIN_VALUE) {
+            val = Bridge::MIN_VALUE;
+        }
+        if(val > Bridge::MAX_VALUE) {
+            val = Bridge::MAX_VALUE;
+        }
+        brigthness = val;
+        if(found != std::string::npos) {
+            duration = atoi(data.substr(found + 1).c_str());
+        }
+    }
+    LOG(moba::DEBUG) <<
+        "--> targets" <<
+        " white: " << brigthness << " duration: " << duration << std::endl;
+    controller->emergencyStop(brigthness, duration);
 }
 
 TargetValues Handler::parseMessageData(const std::string &data) {

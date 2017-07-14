@@ -70,7 +70,7 @@ void Controller::resume() {
 
 }
 
-void Controller::emergencyStop() {
+void Controller::emergencyStop(int brigthness, int duration) {
 
 }
 
@@ -196,33 +196,6 @@ void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
 
 
 
-void Controller::runEmergencyMode(const std::string &data) {
-    TargetValues target;
-    duration = EMERGENCY_DURATION;
-    if(data == "") {
-        target.targetIntensity[Bridge::WHITE] = EMERGENCY_BRIGTHNESS;
-    } else {
-        std::string::size_type pos = 0;
-        std::string::size_type found = data.find(';', pos);
-        int val = atoi(data.substr(pos, found - pos).c_str());
-        if(val < Bridge::MIN_VALUE) {
-            val = Bridge::MIN_VALUE;
-        }
-        if(val > Bridge::MAX_VALUE) {
-            val = Bridge::MAX_VALUE;
-        }
-        target.targetIntensity[Bridge::WHITE] = val;
-        if(found != std::string::npos) {
-            duration = atoi(data.substr(found + 1).c_str());
-        }
-    }
-    LOG(moba::DEBUG) <<
-        "--> targets" <<
-        " white: " << target.targetIntensity[Bridge::WHITE] <<
-        " duration: " << duration << std::endl;
-    controller->setNextTarget(target);
-    emergency = true;
-}
 
 
 void Controller::setDuration(int d) {

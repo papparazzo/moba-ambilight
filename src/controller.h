@@ -56,15 +56,13 @@ class Controller : private boost::noncopyable {
         virtual ~Controller();
 
         void setNewTarget(const TargetValues &newValues, bool immediately);
-        //void runEmergencyMode(const std::string &data);
         bool next();
         void reset();
         void setDuration(int duration);
         void runTestMode();
         void resume();
 
-        void emergencyStop();
-        void emergencyStop(const TargetValues &val);
+        void emergencyStop(int brigthness = Controller::EMERGENCY_BRIGTHNESS, int duration = Controller::EMERGENCY_DURATION);
         void releaseEmergencyStop();
 
     private:
@@ -75,9 +73,6 @@ class Controller : private boost::noncopyable {
 
         static const int RANGE  = 4095;
         static const int STEPS  = RANGE * 10;
-
-        static const int EMERGENCY_BRIGTHNESS = 2000;
-        static const int EMERGENCY_DURATION   = 5;
 
         static const int DEFAULT_DURATION     = 0;
 
