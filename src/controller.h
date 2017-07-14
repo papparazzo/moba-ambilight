@@ -107,6 +107,8 @@ class Plasma {
 
         double d(int x, double t);
 
+        double getPlasmaValue(Bridge::BankColor color, int bank, double t) ;
+
         int counter;
 
         struct Range {
