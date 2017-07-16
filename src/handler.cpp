@@ -35,8 +35,6 @@ Handler::Handler(
 }
 
 void Handler::run() {
-    int i = 0;
-
     do {
         fetchNextMsg();
         if(!controller->next()) {
@@ -49,7 +47,6 @@ void Handler::run() {
 
 void Handler::fetchNextMsg() {
     moba::IPC::Message msg;
-    TargetValues tmpTarget;
     bool halted = false;
 
     while(true) {
