@@ -62,11 +62,10 @@ class Controller : private boost::noncopyable {
         void runTestMode();
         void resume();
 
-        void emergencyStop(int brigthness = Controller::EMERGENCY_BRIGTHNESS, int duration = Controller::EMERGENCY_DURATION);
+        void emergencyStop(int brigthness, int duration);
         void releaseEmergencyStop();
 
     private:
-
         void setNextTarget(const TargetValues &newValues);
 
         TargetValues prefetch(int step = 0);
@@ -78,36 +77,30 @@ class Controller : private boost::noncopyable {
 
 
         TargetValues current;
-        int step[4];
+        int stepWidth[4];
 
         const static Bridge::BankColor bcolor[];
 
-
         int duration;
-
 
         boost::shared_ptr<Bridge> bridge;
 
         moba::Ringbuffer<TargetValues> regularBuffer;
         moba::Ringbuffer<TargetValues> interruptBuffer;
 
+        bool interrupted;
 
-};
 
 
-class Plasma {
 
-    public:
-
+// PLASMA
 
         void setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset);
-
-    private:
-
-
         double d(int x, double t);
 
         double getPlasmaValue(Bridge::BankColor color, int bank, double t) ;
+
+        void plasmanext();
 
         int counter;
 

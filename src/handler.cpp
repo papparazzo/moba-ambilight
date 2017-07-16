@@ -51,7 +51,7 @@ void Handler::fetchNextMsg() {
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
-            throw HandlerException("sigterm caught");
+            throw HandlerException("sig-term caught");
         }
 
         if(!ipc->receive(msg)) {

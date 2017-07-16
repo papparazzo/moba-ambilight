@@ -37,35 +37,92 @@ namespace {
 Controller::Controller(boost::shared_ptr<Bridge> b) {
     bridge  = b;
     duration = DEFAULT_DURATION;
-/*
-    setAmlitudeAndOffset(Bridge::WHITE,   0, 2000);
-    setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
-    setAmlitudeAndOffset(Bridge::RED,   500,  800);
-    setAmlitudeAndOffset(Bridge::BLUE,  500, 1000);
- */
 }
 
 Controller::~Controller() {
 }
 
-void Controller::setNextTarget(const TargetValues &newValues) {
+bool Controller::next() {
+    if(!regularBuffer.hasItems()) {
+        return false;
+    }
+
+    TargetValues target = regularBuffer.pop();
+
+
+
+current;
+
 /*
 
+    do {
+        delayMicroseconds(duration + current.duration);
+        plasma->next();
+    } while(true);
+
+
+    do {
+        fetchNextMsg();
+        delayMicroseconds(duration + current.duration);
+        blas();
+
+
+    } while(true);
+ **/
+}
+
+blas() {
+    for(int j = 0; j < 4; ++j) {
+        if(!step[j] || i % step[j]) {
+            return;
+        }
+        if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
+            current.targetIntensity[j]++;
+        }
+        if(step[j] < 0 && current.targetIntensity[j] > 0) {
+            current.targetIntensity[j]--;
+        }
+        bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
+    }
+
+    i = i++ % Handler::STEPS;
+
+    if(i) {
+        continue;
+    }
+}
+
+
+
+
+
+void Controller::setNextTarget(const TargetValues &newValues) {
+    current.wobble = false;
     for(int i = 0; i < 4; ++i) {
         if(!duration || newValues.direkt) {
             current.targetIntensity[i] = newValues.targetIntensity[i];
-            bridge->setPWMlg(Handler::bcolor[i], current.targetIntensity[i]);
-        } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
-            step[i] = Handler::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
+            bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
+        } else if(newValues.wobble) {
+            current.wobble = true;
+            setAmlitudeAndOffset(i, newValues.targetIntensity[i], current.targetIntensity[i]);
+/*
+            stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
         } else {
-            step[i] = 0;
+            stepWidth[i] = 0;
+ */
+
+
+        } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
+            stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
+        } else {
+            stepWidth[i] = 0;
         }
     }
- */
 }
 
 void Controller::resume() {
-
+    interrupted = false;
+    interruptBuffer.reset();
 }
 
 void Controller::emergencyStop(int brigthness, int duration) {
@@ -79,74 +136,6 @@ void Controller::releaseEmergencyStop() {
 
 TargetValues Controller::prefetch(int step) {
 
-}
-
-bool Controller::next() {
-
-
-/*
-
-
-    TargetValues target;
-
- */
-// FIXME: Hold for x seconds???
-
-    if(!regularBuffer.hasItems()) {
-        return false;
-    }
-
-    TargetValues target = regularBuffer.pop();
-
-/*
-
-    if(target.direkt) {
-        continue;
-    }
-
-    if(target.wobble) {
-        Plasma plasma(bridge);
-        plasma.setAmlitudeAndOffset(Bridge::WHITE, 0, 2000);
-        plasma.setAmlitudeAndOffset(Bridge::GREEN, 500, 2000);
-        plasma.setAmlitudeAndOffset(Bridge::RED, 500, 800);
-        plasma.setAmlitudeAndOffset(Bridge::BLUE, 500, 1000);
-
-        do {
-            if(sigTerm->hasAnySignalTriggered()) {
-                return;
-            }
-            delayMicroseconds(duration + current.duration);
-            plasma->next();
-        } while(true);
-
-    }
-
-    do {
-        fetchNextMsg();
-        delayMicroseconds(duration + current.duration);
-        for(int j = 0; j < 4; ++j) {
-            if(!step[j] || i % step[j]) {
-                continue;
-            }
-            if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
-                current.targetIntensity[j]++;
-            }
-            if(step[j] < 0 && current.targetIntensity[j] > 0) {
-                current.targetIntensity[j]--;
-            }
-            bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
-        }
-
-        i = i++ % Handler::STEPS;
-
-        if(i) {
-            continue;
-        }
-
-
-
-    } while(true);
- **/
 }
 
 void Controller::runTestMode() {
@@ -173,12 +162,10 @@ void Controller::runTestMode() {
     sleep(1);
 }
 
-
 void Controller::reset() {
     regularBuffer.reset();
+    interruptBuffer.reset();
     bridge->setAllOff();
-//                interruptBuffer.reset();
-
 }
 
 void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
@@ -186,13 +173,19 @@ void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
         regularBuffer.push(newValues);
         return;
     }
+    if(interrupted) {
+        interruptBuffer.push(newValues);
+        return;
+    }
+    interrupted = true;
+    // FIXME: Set new values
 }
 
 void Controller::setDuration(int d) {
     duration = static_cast<int>((d * 1000 * 1000) / Controller::STEPS);
 }
 
-void Plasma::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
+void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
         throw ControllerException("amplitude and offset to high!");
     }
@@ -205,21 +198,21 @@ void Plasma::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int of
     range[color].offset = offset;
 }
 
-double Plasma::d(int bank, double t) {
+double Controller::d(int bank, double t) {
     bridge->setPWMlg(Bridge::GREEN, bank, getPlasmaValue(Bridge::GREEN, bank, t));
     bridge->setPWMlg(Bridge::RED,   bank, getPlasmaValue(Bridge::RED,   bank, t));
     bridge->setPWMlg(Bridge::BLUE,  bank, getPlasmaValue(Bridge::BLUE,  bank, t));
     bridge->setPWMlg(Bridge::WHITE, bank, getPlasmaValue(Bridge::WHITE, bank, t));
 }
 
-void Plasma::next() {
+void Controller::plasmanext() {
     counter = ++counter % 200000;
     d(0, (double)counter * PI / 1000);  // right
     d(1, (double)counter * PI / 1000);  // center
     d(2, (double)counter * PI / 1000);  // left
 }
 
-double Plasma::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
+double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
     double v = std::sin(t + 10.0 * bank);
 
     switch(color) {
