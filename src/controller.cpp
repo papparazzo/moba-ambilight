@@ -35,8 +35,10 @@ namespace {
 }
 
 Controller::Controller(boost::shared_ptr<Bridge> b) {
-    bridge  = b;
-    duration = DEFAULT_DURATION;
+    bridge      = b;
+    duration    = DEFAULT_DURATION;
+    halted      = false;
+    interrupted = false;
 }
 
 Controller::~Controller() {
@@ -53,10 +55,10 @@ bool Controller::next() {
         ++i;
         delayMicroseconds(duration + current.duration);
         if(i % regular.duration) {
-
+            stepRegular();
         }
-        if(i % interrupt.duration) {
-
+        if(interrupted && i % interrupt.duration) {
+            stepInterrupt();
         }
     } while(true);
 
@@ -122,13 +124,11 @@ void Controller::resume() {
 }
 
 void Controller::emergencyStop(int brigthness, int duration) {
-
 }
 
 void Controller::releaseEmergencyStop() {
-
+    resume();
 }
-
 
 TargetValues Controller::prefetch(int step) {
 
@@ -236,22 +236,27 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
 
 
 void Controller::stepRegular() {
-    if(doCount) {
+    if(halted) {
         return;
     }
 
-    for(int c = 0; c < 4; ++c) {
-        if(!stepWidth[c] || i % stepWidth[c]) {
-            return;
+    for(int b = 0; b < 3; ++b) {
+        for(int c = 0; c < 4; ++c) {
+            if(!stepWidth[c] || i % stepWidth[c]) {
+                return;
+            }
+            if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
+                current.targetIntensity[c]++;
+            }
+            if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
+                current.targetIntensity[c]--;
+            }
+            if(interrupted) {
+                bridge->setPWMlg(Controller::bcolor[c], b, current.targetIntensity[c]);
+            }
         }
-        if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
-            current.targetIntensity[c]++;
-        }
-        if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
-            current.targetIntensity[c]--;
-        }
-        bridge->setPWMlg(Controller::bcolor[c], current.targetIntensity[c]);
     }
+
 
     i = i++ % Controller::STEPS;
 
@@ -259,9 +264,7 @@ void Controller::stepRegular() {
         continue;
     }
 
-    if(!output) {
-        return;
-    }
+
 }
 
 void Controller::stepInterrupt() {

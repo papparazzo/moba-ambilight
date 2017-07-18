@@ -89,7 +89,7 @@ class Controller : private boost::noncopyable {
         moba::Ringbuffer<TargetValues> interruptBuffer;
 
         bool interrupted;
-
+        bool halted;
 
 
         void stepRegular();
