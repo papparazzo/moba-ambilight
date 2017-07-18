@@ -43,6 +43,26 @@ Controller::~Controller() {
 }
 
 bool Controller::next() {
+
+
+    TargetValues regular;
+    TargetValues interrupt;
+
+    int i;
+    do {
+        ++i;
+        delayMicroseconds(duration + current.duration);
+        if(i % regular.duration) {
+
+        }
+        if(i % interrupt.duration) {
+
+        }
+    } while(true);
+
+
+
+
     if(!regularBuffer.hasItems()) {
         return false;
     }
@@ -70,30 +90,6 @@ current;
     } while(true);
  **/
 }
-
-blas() {
-    for(int j = 0; j < 4; ++j) {
-        if(!step[j] || i % step[j]) {
-            return;
-        }
-        if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
-            current.targetIntensity[j]++;
-        }
-        if(step[j] < 0 && current.targetIntensity[j] > 0) {
-            current.targetIntensity[j]--;
-        }
-        bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
-    }
-
-    i = i++ % Handler::STEPS;
-
-    if(i) {
-        continue;
-    }
-}
-
-
-
 
 
 void Controller::setNextTarget(const TargetValues &newValues) {
@@ -235,3 +231,43 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
 
     return range[color].amplitude * v + range[color].offset;
 }
+
+
+
+
+void stepRegular() {
+    if(doCount) {
+        return;
+    }
+
+    if(!output) {
+        return;
+    }
+}
+
+void stepInterupt() {
+
+}
+
+
+blas() {
+    for(int j = 0; j < 4; ++j) {
+        if(!step[j] || i % step[j]) {
+            return;
+        }
+        if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
+            current.targetIntensity[j]++;
+        }
+        if(step[j] < 0 && current.targetIntensity[j] > 0) {
+            current.targetIntensity[j]--;
+        }
+        bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
+    }
+
+    i = i++ % Handler::STEPS;
+
+    if(i) {
+        continue;
+    }
+}
+
