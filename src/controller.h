@@ -92,6 +92,9 @@ class Controller : private boost::noncopyable {
 
 
 
+        void stepRegular();
+        void stepInterrupt();
+
 
 // PLASMA
 

@@ -235,9 +235,28 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
 
 
 
-void stepRegular() {
+void Controller::stepRegular() {
     if(doCount) {
         return;
+    }
+
+    for(int c = 0; c < 4; ++c) {
+        if(!stepWidth[c] || i % stepWidth[c]) {
+            return;
+        }
+        if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
+            current.targetIntensity[c]++;
+        }
+        if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
+            current.targetIntensity[c]--;
+        }
+        bridge->setPWMlg(Controller::bcolor[c], current.targetIntensity[c]);
+    }
+
+    i = i++ % Controller::STEPS;
+
+    if(i) {
+        continue;
     }
 
     if(!output) {
@@ -245,29 +264,8 @@ void stepRegular() {
     }
 }
 
-void stepInterupt() {
+void Controller::stepInterrupt() {
 
 }
 
-
-blas() {
-    for(int j = 0; j < 4; ++j) {
-        if(!step[j] || i % step[j]) {
-            return;
-        }
-        if(step[j] > 0 && current.targetIntensity[j] < Handler::RANGE) {
-            current.targetIntensity[j]++;
-        }
-        if(step[j] < 0 && current.targetIntensity[j] > 0) {
-            current.targetIntensity[j]--;
-        }
-        bridge->setPWMlg(Handler::bcolor[j], current.targetIntensity[j]);
-    }
-
-    i = i++ % Handler::STEPS;
-
-    if(i) {
-        continue;
-    }
-}
 
