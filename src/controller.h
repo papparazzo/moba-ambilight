@@ -68,16 +68,18 @@ class Controller : private boost::noncopyable {
     private:
         void setNextTarget(const TargetValues &newValues);
 
-        TargetValues prefetch(int step = 0);
+        Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
 
-        static const int RANGE  = 4095;
-        static const int STEPS  = RANGE * 10;
+        static const int RANGE = Bridge::MAX_VALUE;
+        static const int TOTAL_STEPS_COUNT = RANGE * 10;
 
         static const int DEFAULT_DURATION     = 0;
 
+        Bridge::BankColorValues stepWidth[Bridge::BANK_COUNT];
+        Bridge::BankColorValues currentValue[Bridge::BANK_COUNT];
+        Bridge::BankColorValues targetValue[Bridge::BANK_COUNT];
 
-        TargetValues current;
-        int stepWidth[4];
+
 
         const static Bridge::BankColor bcolor[];
 

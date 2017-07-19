@@ -57,7 +57,7 @@ bool Controller::next() {
     int i;
     do {
         ++i;
-        delayMicroseconds(duration + current.duration);
+        //delayMicroseconds(duration + current.duration);
         if(i % regular.duration) {
             stepRegular();
         }
@@ -86,26 +86,28 @@ bool Controller::next() {
 
 
 void Controller::setNextTarget(const TargetValues &newValues) {
-    current.wobble = false;
+    //current.wobble = false;
     for(int i = 0; i < 4; ++i) {
+        /*
         if(!duration || newValues.direkt) {
-            current.targetIntensity[i] = newValues.targetIntensity[i];
-            bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
+            //current.targetIntensity[i] = newValues.targetIntensity[i];
+            //bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.wobble) {
-            current.wobble = true;
-            setAmlitudeAndOffset((Bridge::BankColor)i, newValues.targetIntensity[i], current.targetIntensity[i]);
+            //current.wobble = true;
+            //setAmlitudeAndOffset((Bridge::BankColor)i, newValues.targetIntensity[i], current.targetIntensity[i]);
 /*
             stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
         } else {
             stepWidth[i] = 0;
  */
 
+/*
 
         } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
-            stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
+            stepWidth[i] = TOTAL_STEPS_COUNT / (newValues.targetIntensity[i] - current.targetIntensity[i]);
         } else {
             stepWidth[i] = 0;
-        }
+        }*/
     }
 }
 
@@ -121,8 +123,12 @@ void Controller::releaseEmergencyStop() {
     resume();
 }
 
-TargetValues Controller::prefetch(int step) {
+Bridge::BankColorValues Controller::getBankColors(int stepsAhead, int bank) {
+    if(counter + stepsAhead > TOTAL_STEPS_COUNT) {
+        // return getFuture(counter + stepsAhead - TOTAL_STEPS_COUNT);
+    }
 
+    //stepsAhead * stepWidth counter
 }
 
 void Controller::runTestMode() {
@@ -169,7 +175,7 @@ void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
 }
 
 void Controller::setDuration(int d) {
-    duration = static_cast<int>((d * 1000 * 1000) / Controller::STEPS);
+    duration = static_cast<int>((d * 1000 * 1000) / TOTAL_STEPS_COUNT);
 }
 
 void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
@@ -231,7 +237,7 @@ void Controller::stepRegular() {
     if(halted) {
         return;
     }
-
+/*
     for(int b = 0; b < 3; ++b) {
         for(int c = 0; c < 4; ++c) {
             if(!stepWidth[c] || i % stepWidth[c]) {
@@ -248,9 +254,9 @@ void Controller::stepRegular() {
             }
         }
     }
+*/
 
-
-    i = i++ % Controller::STEPS;
+    i = i++ % TOTAL_STEPS_COUNT;
 
     if(i) {
         //continue;
