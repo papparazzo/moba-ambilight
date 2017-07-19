@@ -210,31 +210,44 @@ void Bridge::setPWMFrequency(int freq) {
 }
 
 void Bridge::setOn(BankColor color) {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 4096, 0);
     }
 }
 
 void Bridge::setOff(BankColor color) {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 0, 0);
     }
 }
 
 void Bridge::setPWM(BankColor color, int on, int off) {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, on, off);
     }
 }
 
 void Bridge::setPWMlg(BankColor color, int val) {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < BANK_COUNT; ++i) {
         setPWMlg(color, i, val);
     }
 }
 
 void Bridge::setPWMlg(BankColor color, int bank, int val) {
     setData(color, bank, 0, table[val]);
+}
+
+void Bridge::setPWMlg(const Bridge::BankColorValues &values, int bank) {
+    setPWMlg(WHITE, int bank, values.value[WHITE]);
+    setPWMlg(RED, int bank, values.value[RED]);
+    setPWMlg(GREEN, int bank, values.value[GREEN]);
+    setPWMlg(BLUE, int bank, values.value[BLUE]);
+}
+
+void Bridge::setPWMlg(const Bridge::BankColorValues &values) {
+   for(int i = 0; i < BANK_COUNT; ++i) {
+        setPWMlg(values, i);
+    }
 }
 
 void Bridge::setData(Bridge::BankColor color, int bank, int on, int off) {

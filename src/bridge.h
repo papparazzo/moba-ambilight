@@ -54,12 +54,17 @@ class Bridge : private boost::noncopyable {
         static const int MAX_VALUE = 4095;
         static const int MIN_VALUE = 0;
         static const int COLOR_COUNT = 4; // white, green, red, blue...
+        static const int BANK_COUNT = 4;
 
         enum BankColor {
             WHITE = 0,
             GREEN = 1,
             RED   = 2,
             BLUE  = 3
+        };
+
+        struct BankColorValues {
+            int value[COLOR_COUNT];
         };
 
         Bridge(int address = 0x40);
@@ -73,7 +78,9 @@ class Bridge : private boost::noncopyable {
         void setPWM(BankColor color, int on, int off);
         void setPWMlg(BankColor color, int val);
         void setPWMlg(BankColor color, int bank, int val);
-        void setData(BankColor color, int bank, int on, int off) ;
+        void setPWMlg(const BankColorValues &values, int bank);
+        void setPWMlg(const BankColorValues &values);
+        void setData(BankColor color, int bank, int on, int off);
         void setAllOff();
 
         const char *getColorName(BankColor c);
