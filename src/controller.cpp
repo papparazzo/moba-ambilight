@@ -23,16 +23,18 @@
 #include <cmath>
 
 #include "controller.h"
+#include <wiringPi.h>
 
 namespace {
     const double PI = 3.1415926535897932384626433832795;
-    const Bridge::BankColor Controller::bcolor[] = {
-        Bridge::BLUE,
-        Bridge::GREEN,
-        Bridge::RED,
-        Bridge::WHITE
-    };
 }
+
+const Bridge::BankColor Controller::bcolor[] = {
+    Bridge::BLUE,
+    Bridge::GREEN,
+    Bridge::RED,
+    Bridge::WHITE
+};
 
 Controller::Controller(boost::shared_ptr<Bridge> b) {
     bridge      = b;
@@ -45,9 +47,11 @@ Controller::~Controller() {
 }
 
 bool Controller::next() {
+    if(!regularBuffer.hasItems()) {
+        return false;
+    }
 
-
-    TargetValues regular;
+    TargetValues regular = regularBuffer.pop();
     TargetValues interrupt;
 
     int i;
@@ -61,19 +65,6 @@ bool Controller::next() {
             stepInterrupt();
         }
     } while(true);
-
-
-
-
-    if(!regularBuffer.hasItems()) {
-        return false;
-    }
-
-    TargetValues target = regularBuffer.pop();
-
-
-
-current;
 
 /*
 
@@ -102,7 +93,7 @@ void Controller::setNextTarget(const TargetValues &newValues) {
             bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.wobble) {
             current.wobble = true;
-            setAmlitudeAndOffset(i, newValues.targetIntensity[i], current.targetIntensity[i]);
+            setAmlitudeAndOffset((Bridge::BankColor)i, newValues.targetIntensity[i], current.targetIntensity[i]);
 /*
             stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
         } else {
@@ -236,6 +227,7 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
 
 
 void Controller::stepRegular() {
+    int i;
     if(halted) {
         return;
     }
@@ -261,7 +253,7 @@ void Controller::stepRegular() {
     i = i++ % Controller::STEPS;
 
     if(i) {
-        continue;
+        //continue;
     }
 
 
@@ -270,5 +262,4 @@ void Controller::stepRegular() {
 void Controller::stepInterrupt() {
 
 }
-
 
