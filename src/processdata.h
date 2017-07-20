@@ -23,15 +23,37 @@
 #pragma once
 
 #include "bridge.h"
+#include <exception>
+
+class ProcessDataException : public std::exception {
+
+    public:
+        virtual ~ProcessDataException() throw() {
+        }
+
+        ProcessDataException(const std::string &what) {
+            what__ = what;
+        }
+
+        virtual const char* what() const throw() {
+            return what__.c_str();
+        }
+
+    private:
+        std::string what__;
+};
 
 class ProcessData {
     public:
+        static const int RANGE = Bridge::MAX_VALUE;
+        static const int TOTAL_STEPS_COUNT = RANGE * 10;
+
         ProcessData();
         virtual ~ProcessData();
 
-        Bridge::BankColorValues[Bridge::BANK_COUNT] stepWidth;
-        Bridge::BankColorValues[Bridge::BANK_COUNT] current;
-        Bridge::BankColorValues[Bridge::BANK_COUNT] target;
+        Bridge::BankColorValues stepWidth[Bridge::BANK_COUNT];
+        Bridge::BankColorValues current[Bridge::BANK_COUNT];
+        Bridge::BankColorValues target[Bridge::BANK_COUNT];
 
         int duration;
 
@@ -40,10 +62,10 @@ class ProcessData {
 
         unsigned int getObjectId() const;
 
+        Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
+
     private:
         unsigned int objNb;
         static unsigned int counter;
 };
-
-
 

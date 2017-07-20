@@ -27,7 +27,6 @@
 #include <boost/noncopyable.hpp>
 
 #include "bridge.h"
-#include "targetvalues.h"
 
 #include <moba/ringbuffer.h>
 
@@ -68,17 +67,7 @@ class Controller : private boost::noncopyable {
     private:
         void setNextTarget(const TargetValues &newValues);
 
-        Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
-
-        static const int RANGE = Bridge::MAX_VALUE;
-        static const int TOTAL_STEPS_COUNT = RANGE * 10;
-
         static const int DEFAULT_DURATION     = 0;
-
-        Bridge::BankColorValues stepWidth[Bridge::BANK_COUNT];
-        Bridge::BankColorValues currentValue[Bridge::BANK_COUNT];
-        Bridge::BankColorValues targetValue[Bridge::BANK_COUNT];
-
 
 
         const static Bridge::BankColor bcolor[];
