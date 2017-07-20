@@ -128,6 +128,16 @@ Bridge::BankColorValues Controller::getBankColors(int stepsAhead, int bank) {
         // return getFuture(counter + stepsAhead - TOTAL_STEPS_COUNT);
     }
 
+    if(!stepWidth[c] || i % stepWidth[c]) {
+        return;
+    }
+    if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
+        current.targetIntensity[c]++;
+    }
+    if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
+        current.targetIntensity[c]--;
+    }
+
     //stepsAhead * stepWidth counter
 }
 
@@ -233,10 +243,12 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
 
 
 void Controller::stepRegular() {
-    int i;
+
     if(halted) {
         return;
     }
+
+
 /*
     for(int b = 0; b < 3; ++b) {
         for(int c = 0; c < 4; ++c) {
@@ -257,11 +269,6 @@ void Controller::stepRegular() {
 */
 
     i = i++ % TOTAL_STEPS_COUNT;
-
-    if(i) {
-        //continue;
-    }
-
 
 }
 
