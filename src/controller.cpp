@@ -51,8 +51,8 @@ bool Controller::next() {
         return false;
     }
 
-    TargetValues regular = regularBuffer.pop();
-    TargetValues interrupt;
+    ProcessData regular = regularBuffer.pop();
+    ProcessData interrupt;
 
     int i;
     do {
@@ -122,17 +122,16 @@ void Controller::runTestMode() {
 
 void Controller::reset() {
     regularBuffer.reset();
-    interruptBuffer.reset();
     bridge->setAllOff();
 }
 
-void Controller::setNewTarget(const TargetValues& newValues, bool immediately) {
+void Controller::setNewTarget(const ProcessData& newValues, bool immediately) {
     if(!immediately) {
         regularBuffer.push(newValues);
         return;
     }
     if(interrupted) {
-        interruptBuffer.push(newValues);
+        //interruptBuffer.push(newValues);
         return;
     }
     interrupted = true;

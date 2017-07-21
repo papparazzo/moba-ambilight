@@ -57,9 +57,6 @@ class ProcessData {
 
         int duration;
 
-        bool wobble;
-        bool direkt;
-
         unsigned int getObjectId() const;
 
         Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
@@ -69,3 +66,11 @@ class ProcessData {
         static unsigned int counter;
 };
 
+class PrcoessDataWobble : public ProcessData {
+    public:
+
+};
+
+class ProcessDataNormal : public ProcessData {
+    public:
+};

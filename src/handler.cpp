@@ -121,6 +121,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
+                // FIXME: Direct...
                 controller->reset();
                 emergency = false;
                 halted = false;

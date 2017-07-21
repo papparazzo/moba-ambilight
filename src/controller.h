@@ -26,9 +26,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "bridge.h"
-
 #include <moba/ringbuffer.h>
+
+#include "bridge.h"
+#include "processdata.h"
 
 class ControllerException : public std::exception {
 
@@ -65,7 +66,7 @@ class Controller : private boost::noncopyable {
         void releaseEmergencyStop();
 
     private:
-        void setNextTarget(const TargetValues &newValues);
+        void setNextTarget(const ProcessData &newValues);
 
         static const int DEFAULT_DURATION     = 0;
 
@@ -76,8 +77,7 @@ class Controller : private boost::noncopyable {
 
         boost::shared_ptr<Bridge> bridge;
 
-        moba::Ringbuffer<TargetValues> regularBuffer;
-        moba::Ringbuffer<TargetValues> interruptBuffer;
+        moba::Ringbuffer<ProcessData> regularBuffer;
 
         bool interrupted;
         bool halted;

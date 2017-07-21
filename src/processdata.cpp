@@ -30,7 +30,6 @@ ProcessData::ProcessData() {
     targetIntensity[2] = 0;
     targetIntensity[3] = 0;
     wobble = false;
-    direkt = false;
     objNb = counter++;
 }
 
