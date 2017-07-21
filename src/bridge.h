@@ -64,6 +64,12 @@ class Bridge : private boost::noncopyable {
         };
 
         struct BankColorValues {
+            BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
+                value[WHITE] = white;
+                value[GREEN] = green;
+                value[RED]   = red;
+                value[BLUE]  = blue;
+            }
             int value[COLOR_COUNT];
         };
 

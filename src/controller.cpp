@@ -46,6 +46,10 @@ Controller::Controller(boost::shared_ptr<Bridge> b) {
 Controller::~Controller() {
 }
 
+void Controller::setDirectValues(Bridge::BankColorValues values) {
+    
+}
+
 bool Controller::next() {
     if(!regularBuffer.hasItems()) {
         return false;

@@ -28,7 +28,7 @@
 #include <string>
 #include <exception>
 
-#include "targetvalues.h"
+#include "processdata.h"
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
@@ -74,7 +74,8 @@ class Handler : private boost::noncopyable {
 
         void fetchNextMsg();
         void runEmergencyMode(const std::string &data);
-        TargetValues parseMessageData(const std::string &data);
+        ProcessData parseMessageData(const std::string &data);
+        Bridge::BankColorValues parseDirectMessageData(const std::string &data);
 
         bool emergency;
 };

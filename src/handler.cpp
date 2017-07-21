@@ -121,8 +121,8 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
-                // FIXME: Direct...
                 controller->reset();
+                controller->setDirectValues(parseDirectMessageData(msg.mtext));
                 emergency = false;
                 halted = false;
                 break;
@@ -190,11 +190,20 @@ void Handler::runEmergencyMode(const std::string &data) {
     controller->emergencyStop(brigthness, duration);
 }
 
-TargetValues Handler::parseMessageData(const std::string &data) {
+Bridge::BankColorValues Handler::parseDirectMessageData(const std::string &data) {
+    Bridge::BankColorValues values;
+    if(data == "") {
+        return values;
+    }
+
+
+}
+
+ProcessData Handler::parseMessageData(const std::string &data) {
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
-    TargetValues target;
+    ProcessData target;
     int val;
 
     for(int i = 0; i < 6; ++i) {
@@ -223,10 +232,6 @@ TargetValues Handler::parseMessageData(const std::string &data) {
                     case 'W':
                         target.wobble = true;
                         break;
-
-                    case 'D':
-                        target.direkt = true;
-                        break;
                 }
                 break;
         }
@@ -241,7 +246,5 @@ TargetValues Handler::parseMessageData(const std::string &data) {
         " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
     LOG(moba::DEBUG) <<
         "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
-    LOG(moba::DEBUG) <<
-        "--> direct: " << (target.direkt ? "on" : "off") << std::endl;
     return target;
 }

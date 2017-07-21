@@ -55,7 +55,8 @@ class Controller : private boost::noncopyable {
         Controller(boost::shared_ptr<Bridge> b);
         virtual ~Controller();
 
-        void setNewTarget(const TargetValues &newValues, bool immediately);
+        void setNewTarget(const ProcessData &newValues, bool immediately);
+        void setDirectValues(Bridge::BankColorValues values);
         bool next();
         void reset();
         void setDuration(int duration);
@@ -66,6 +67,8 @@ class Controller : private boost::noncopyable {
         void releaseEmergencyStop();
 
     private:
+
+
         void setNextTarget(const ProcessData &newValues);
 
         static const int DEFAULT_DURATION     = 0;

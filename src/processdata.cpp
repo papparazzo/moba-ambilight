@@ -25,11 +25,6 @@
 unsigned int ProcessData::counter = 0;
 
 ProcessData::ProcessData() {
-    targetIntensity[0] = 0;
-    targetIntensity[1] = 0;
-    targetIntensity[2] = 0;
-    targetIntensity[3] = 0;
-    wobble = false;
     objNb = counter++;
 }
 
@@ -46,9 +41,6 @@ Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
         throw ProcessDataException("out of range");
     }
 
-    if(wobble) {
-
-    }
 }
 
 
@@ -77,7 +69,7 @@ void Controller::setNextTarget(const TargetValues &newValues) {
     //current.wobble = false;
     for(int i = 0; i < 4; ++i) {
         /*
-        if(!duration || newValues.direkt) {
+        if(!duration) {
             //current.targetIntensity[i] = newValues.targetIntensity[i];
             //bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
         } else if(newValues.wobble) {
