@@ -203,7 +203,7 @@ ProcessData Handler::parseMessageData(const std::string &data) {
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
-    ProcessData target;
+    ProcessData processdata;
     int val;
 
     for(int i = 0; i < 6; ++i) {
@@ -220,31 +220,31 @@ ProcessData Handler::parseMessageData(const std::string &data) {
                 if(val > Bridge::MAX_VALUE) {
                     val = Bridge::MAX_VALUE;
                 }
-                target.targetIntensity[i] = val;
+                processdata.targetIntensity[i] = val;
                 break;
 
             case 5:
-                target.duration = atoi(data.substr(pos, found - pos).c_str());
+                processdata.duration = atoi(data.substr(pos, found - pos).c_str());
                 break;
 
             case 6:
                 switch(data.substr(pos, found - pos)[0]) {
                     case 'W':
-                        target.wobble = true;
+                        processdata.wobble = true;
                         break;
                 }
                 break;
         }
         pos = found + 1;
     }
-    LOG(moba::DEBUG) << "--> " << "inserting #" << target.getObjectId() << "..." << std::endl;
+    LOG(moba::DEBUG) << "--> " << "inserting #" << processdata.getObjectId() << "..." << std::endl;
     LOG(moba::DEBUG) <<
         "--> targets" <<
-        " white: " << target.targetIntensity[Bridge::WHITE] <<
-        " green: " << target.targetIntensity[Bridge::GREEN] <<
-        " red: " << target.targetIntensity[Bridge::RED] <<
-        " blue: " << target.targetIntensity[Bridge::BLUE] << std::endl;
+        " white: " << processdata.targetIntensity[Bridge::WHITE] <<
+        " green: " << processdata.targetIntensity[Bridge::GREEN] <<
+        " red: " << processdata.targetIntensity[Bridge::RED] <<
+        " blue: " << processdata.targetIntensity[Bridge::BLUE] << std::endl;
     LOG(moba::DEBUG) <<
-        "--> wobble: " << (target.wobble ? "on" : "off") << std::endl;
+        "--> wobble: " << (processdata.wobble ? "on" : "off") << std::endl;
     return target;
 }
