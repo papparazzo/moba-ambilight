@@ -134,7 +134,6 @@ void Controller::setNewTarget(const ProcessData& newValues, bool immediately) {
         return;
     }
     if(interrupted) {
-        //interruptBuffer.push(newValues);
         return;
     }
     interrupted = true;

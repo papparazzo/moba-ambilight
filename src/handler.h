@@ -64,6 +64,12 @@ class Handler : private boost::noncopyable {
 
         void run();
 
+        struct NewValues {
+            Bridge::BankColorValues values[4];
+            bool wobble;
+            int duration;
+        };
+
     protected:
         boost::shared_ptr<Controller> controller;
         boost::shared_ptr<moba::IPC> ipc;

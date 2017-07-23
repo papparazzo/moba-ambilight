@@ -223,10 +223,14 @@ Bridge::BankColorValues Handler::parseDirectMessageData(const std::string &data)
 }
 
 ProcessData Handler::parseMessageData(const std::string &data) {
+    NewValues values;
+    if(data == "") {
+        return values;
+    }
+
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
-    ProcessData processdata;
     int val;
 
     for(int i = 0; i < 6; ++i) {
@@ -243,31 +247,38 @@ ProcessData Handler::parseMessageData(const std::string &data) {
                 if(val > Bridge::MAX_VALUE) {
                     val = Bridge::MAX_VALUE;
                 }
-                processdata.targetIntensity[i] = val;
+                for(int j = 0; j < Bridge::BANK_COUNT; ++j) {
+                    values.values[i][j] = val;
+                }
                 break;
 
             case 5:
-                processdata.duration = atoi(data.substr(pos, found - pos).c_str());
+                values.duration = atoi(data.substr(pos, found - pos).c_str());
                 break;
 
             case 6:
                 switch(data.substr(pos, found - pos)[0]) {
                     case 'W':
-                        processdata.wobble = true;
+                        values.wobble = true;
+                        break;
+
+                    default:
+                        values.wobble = false;
                         break;
                 }
                 break;
         }
         pos = found + 1;
     }
-    LOG(moba::DEBUG) << "--> " << "inserting #" << processdata.getObjectId() << "..." << std::endl;
+    for(int t = 0; t < Bridge::BANK_COUNT; ++t) {
+        LOG(moba::DEBUG) <<
+            "--> targets " <<
+            " white: " << values.values[Bridge::WHITE][t] <<
+            " green: " << values.values[Bridge::GREEN][t] <<
+            " red: " << values.values[Bridge::RED][t] <<
+            " blue: " << values.values[Bridge::BLUE][t] << std::endl;
+    }
     LOG(moba::DEBUG) <<
-        "--> targets" <<
-        " white: " << processdata.targetIntensity[Bridge::WHITE] <<
-        " green: " << processdata.targetIntensity[Bridge::GREEN] <<
-        " red: " << processdata.targetIntensity[Bridge::RED] <<
-        " blue: " << processdata.targetIntensity[Bridge::BLUE] << std::endl;
-    LOG(moba::DEBUG) <<
-        "--> wobble: " << (processdata.wobble ? "on" : "off") << std::endl;
-    return target;
+        "--> wobble: " << (values.wobble ? "on" : "off") << std::endl;
+    return values;
 }
