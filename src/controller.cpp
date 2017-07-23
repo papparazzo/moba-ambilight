@@ -47,7 +47,7 @@ Controller::~Controller() {
 }
 
 void Controller::setDirectValues(Bridge::BankColorValues values) {
-    
+
 }
 
 bool Controller::next() {
@@ -90,7 +90,6 @@ bool Controller::next() {
 
 void Controller::resume() {
     interrupted = false;
-    interruptBuffer.reset();
 }
 
 void Controller::emergencyStop(int brigthness, int duration) {
@@ -233,4 +232,3 @@ void Controller::stepRegular() {
 void Controller::stepInterrupt() {
 
 }
-

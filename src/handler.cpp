@@ -196,7 +196,30 @@ Bridge::BankColorValues Handler::parseDirectMessageData(const std::string &data)
         return values;
     }
 
+    std::string::size_type pos = 0;
+    std::string::size_type found = 0;
 
+    int val;
+
+    for(int i = 0; i < Bridge::COLOR_COUNT ; ++i) {
+        found = data.find(';', pos);
+        val = atoi(data.substr(pos, found - pos).c_str());
+        if(val < Bridge::MIN_VALUE) {
+            val = Bridge::MIN_VALUE;
+        }
+        if(val > Bridge::MAX_VALUE) {
+            val = Bridge::MAX_VALUE;
+        }
+        values.value[i] = val;
+        pos = found + 1;
+    }
+    LOG(moba::DEBUG) <<
+        "--> direct" <<
+        " white: " << values.value[Bridge::WHITE] <<
+        " green: " << values.value[Bridge::GREEN] <<
+        " red: " << values.value[Bridge::RED] <<
+        " blue: " << values.value[Bridge::BLUE] << std::endl;
+    return values;
 }
 
 ProcessData Handler::parseMessageData(const std::string &data) {
