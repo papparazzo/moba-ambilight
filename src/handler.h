@@ -77,15 +77,19 @@ class Handler : private boost::noncopyable {
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
         void fetchNextMsg();
-
         void runTestMode();
+        void reset(const std::string &data);
 
+        /*
         void runEmergencyMode(const std::string &data);
         ProcessData parseMessageData(const std::string &data);
         Bridge::BankColorValues parseDirectMessageData(const std::string &data);
+         */
 
+    private:
         bool emergency;
         int duration;
 
         moba::Ringbuffer<ProcessData> regularBuffer;
+        Bridge::BankColorValues currentValues[Bridge::BANK_COUNT];
 };

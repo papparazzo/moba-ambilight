@@ -35,9 +35,7 @@ class Controller : private boost::noncopyable {
         virtual ~Controller();
 
         void setNewTarget(const ProcessData &newValues, bool immediately);
-        void setDirectValues(Bridge::BankColorValues values);
         bool next();
-        void reset();
         void resume();
 
         void emergencyStop(int brigthness, int duration);

@@ -37,17 +37,12 @@ const Bridge::BankColor Controller::bcolor[] = {
 };
 
 Controller::Controller(boost::shared_ptr<Bridge> b) {
-    bridge      = b;
-    duration    = DEFAULT_DURATION;
+
     halted      = false;
     interrupted = false;
 }
 
 Controller::~Controller() {
-}
-
-void Controller::setDirectValues(Bridge::BankColorValues values) {
-
 }
 
 bool Controller::next() {
@@ -98,24 +93,6 @@ void Controller::emergencyStop(int brigthness, int duration) {
 void Controller::releaseEmergencyStop() {
     resume();
 }
-
-void Controller::reset() {
-    regularBuffer.reset();
-    bridge->setAllOff();
-}
-
-void Controller::setNewTarget(const ProcessData& newValues, bool immediately) {
-    if(!immediately) {
-        regularBuffer.push(newValues);
-        return;
-    }
-    if(interrupted) {
-        return;
-    }
-    interrupted = true;
-    // FIXME: Set new values
-}
-
 
 void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {

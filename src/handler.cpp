@@ -102,10 +102,11 @@ void Handler::fetchNextMsg() {
             /*
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
-                controller->setNewTarget(parseMessageData(msg.mtext), false);
+                       regularBuffer.push(newValues);
+             * controller->setNewTarget(parseMessageData(msg.mtext), false);
                 break;
             }
-
+*/
             case moba::IPC::CMD_HALT: {
                 LOG(moba::DEBUG) << "halt..." << std::endl;
                 if(halted) {
@@ -126,9 +127,7 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
-                controller->reset();
-                controller->setDirectValues(parseDirectMessageData(msg.mtext));
-                emergency = false;
+                reset(msg.mtext);
                 halted = false;
                 break;
             }
@@ -137,7 +136,7 @@ void Handler::fetchNextMsg() {
                 LOG(moba::DEBUG) << "terminate... " << std::endl;
                 throw HandlerException("terminate received");
             }
-
+            /*
             case moba::IPC::CMD_INTERRUPT: {
                 LOG(moba::DEBUG) << "interrupt... " << std::endl;
                 controller->setNewTarget(parseMessageData(msg.mtext), true);
@@ -200,6 +199,35 @@ void Handler::runTestMode() {
     bridge->setAllOff();
     sleep(1);
 }
+
+void Handler::reset(const std::string &data) {
+    regularBuffer.reset();
+
+    //currentValues
+
+
+
+
+    controller->setDirectValues(parseDirectMessageData());
+    emergency = false;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
