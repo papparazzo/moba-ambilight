@@ -91,3 +91,86 @@ void Controller::setNextTarget(const TargetValues &newValues) {
     }
 }
  * */
+
+
+void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
+    if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
+        throw ControllerException("amplitude and offset to high!");
+    }
+
+    if(offset < Bridge::MIN_VALUE) {
+        throw ControllerException("amplitude and offset to low!");
+    }
+
+    range[color].amplitude =  amplitude;
+    range[color].offset = offset;
+}
+
+double Controller::d(int bank, double t) {
+    bridge->setPWMlg(Bridge::GREEN, bank, getPlasmaValue(Bridge::GREEN, bank, t));
+    bridge->setPWMlg(Bridge::RED,   bank, getPlasmaValue(Bridge::RED,   bank, t));
+    bridge->setPWMlg(Bridge::BLUE,  bank, getPlasmaValue(Bridge::BLUE,  bank, t));
+    bridge->setPWMlg(Bridge::WHITE, bank, getPlasmaValue(Bridge::WHITE, bank, t));
+}
+
+void Controller::plasmanext() {
+    counter = ++counter % 200000;
+    d(0, (double)counter * PI / 1000);  // right
+    d(1, (double)counter * PI / 1000);  // center
+    d(2, (double)counter * PI / 1000);  // left
+}
+
+double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
+    double v = std::sin(t + 10.0 * bank);
+
+    switch(color) {
+        case Bridge::BLUE:
+            v = 1 + std::sin(v * PI + 4 * PI / 3);
+            break;
+
+        case Bridge::RED:
+            v = 1 + std::sin(v * PI);
+            break;
+
+        case Bridge::GREEN:
+            v = 1 + std::sin(v * PI + 2 * PI / 3);
+            break;
+
+        case Bridge::WHITE:
+            v = 1 + std::sin(v * PI + 8 * PI / 3);
+            break;
+    }
+
+    return range[color].amplitude * v + range[color].offset;
+}
+
+void Controller::stepRegular() {
+
+    if(halted) {
+        return;
+    }
+
+
+/*
+    for(int b = 0; b < 3; ++b) {
+        for(int c = 0; c < 4; ++c) {
+            if(!stepWidth[c] || i % stepWidth[c]) {
+                return;
+            }
+            if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
+                current.targetIntensity[c]++;
+            }
+            if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
+                current.targetIntensity[c]--;
+            }
+            if(interrupted) {
+                bridge->setPWMlg(Controller::bcolor[c], b, current.targetIntensity[c]);
+            }
+        }
+    }
+*/
+
+    i = i++ % TOTAL_STEPS_COUNT;
+
+}
+
