@@ -83,7 +83,6 @@ class Handler : private boost::noncopyable {
         /*
         void runEmergencyMode(const std::string &data);
         ProcessData parseMessageData(const std::string &data);
-        Bridge::BankColorValues parseDirectMessageData(const std::string &data);
          */
 
     private:
