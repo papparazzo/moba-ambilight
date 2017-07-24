@@ -70,6 +70,11 @@ class Bridge : private boost::noncopyable {
                 value[RED]   = red;
                 value[BLUE]  = blue;
             }
+            BankColorValues(const BankColorValues &orig) {
+               for(int c = 0; c < COLOR_COUNT; ++c) {
+                   value[c] = orig.value[c];
+               }
+            }
             int value[COLOR_COUNT];
         };
 
