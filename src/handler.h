@@ -86,5 +86,5 @@ class Handler : private boost::noncopyable {
         int duration;
 
         moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
-        Bridge::BankColorValues currentValues[Bridge::BANK_COUNT];
+        Bridge::BankColorValues currentValues;
 };

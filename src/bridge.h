@@ -66,34 +66,43 @@ class Bridge : private boost::noncopyable {
         struct BankColorValues {
             public:
                 BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
-                    value[WHITE] = white;
-                    value[GREEN] = green;
-                    value[RED]   = red;
-                    value[BLUE]  = blue;
+                    for(int b = 0; b < BANK_COUNT; ++b) {
+                        value[b][WHITE] = white;
+                        value[b][GREEN] = green;
+                        value[b][RED]   = red;
+                        value[b][BLUE]  = blue;
+                    }
                 }
                 BankColorValues(const BankColorValues &orig) {
                     setAll(orig);
                 }
                 void setColor(BankColor color, int val) {
+                    for(int b = 0; b < BANK_COUNT; ++b) {
+                        setColor(b, color, val);
+                    }
+                }
+                void setColor(int bank, BankColor color, int val) {
                     if(val < Bridge::MIN_VALUE) {
                         val = Bridge::MIN_VALUE;
                     }
                     if(val > Bridge::MAX_VALUE) {
                         val = Bridge::MAX_VALUE;
                     }
-                    value[color] = val;
+                    value[bank][color] = val;
                 }
                 void setAll(const BankColorValues &val) {
-                   for(int c = 0; c < COLOR_COUNT; ++c) {
-                       value[c] = val.value[c];
-                   }
+                    for(int c = 0; c < COLOR_COUNT; ++c) {
+                        for(int b = 0; b < BANK_COUNT; ++b) {
+                            value[b][c] = val.value[b][c];
+                        }
+                    }
                 }
-                int getColor(BankColor color) {
-                    return value[color];
+                int getColor(int bank, BankColor color) {
+                    return value[bank][color];
                 }
 
             private:
-                int value[COLOR_COUNT];
+                int value[BANK_COUNT][COLOR_COUNT];
         };
 
         Bridge(int address = 0x40);

@@ -54,17 +54,14 @@ class ProcessData {
         unsigned int getObjectId() const;
 
 
-        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &start, int dur) {
-
-        }
+        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &target, int dur);
 
 
     protected:
-/*
-        Bridge::BankColorValues stepWidth[Bridge::BANK_COUNT];
-        Bridge::BankColorValues current[Bridge::BANK_COUNT];
-        Bridge::BankColorValues target[Bridge::BANK_COUNT];
- */
+
+        Bridge::BankColorValues stepWidth;
+        Bridge::BankColorValues current;
+        Bridge::BankColorValues target;
 
         int duration;
 

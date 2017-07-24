@@ -24,8 +24,9 @@
 
 unsigned int ProcessData::counter = 0;
 
-ProcessData::ProcessData() {
+ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &target, int dur) {
     objNb = counter++;
+    
 }
 
 ProcessData::~ProcessData() {

@@ -248,21 +248,18 @@ void Handler::reset(const std::string &data) {
         for(int i = 0; i < Bridge::COLOR_COUNT ; ++i) {
             found = data.find(';', pos);
             val = atoi(data.substr(pos, found - pos).c_str());
-            values.setColor(val);
+            values.setColor(i, val);
             pos = found + 1;
         }
         LOG(moba::DEBUG) <<
             "--> direct" <<
-            " white: " << values.getColor(Bridge::WHITE) <<
-            " green: " << values.getColor(Bridge::GREEN) <<
-            " red: " << values.getColor(Bridge::RED) <<
-            " blue: " << values.getColor(Bridge::BLUE) << std::endl;
+            " white: " << values.getColor(0, Bridge::WHITE) <<
+            " green: " << values.getColor(0, Bridge::GREEN) <<
+            " red: " << values.getColor(0, Bridge::RED) <<
+            " blue: " << values.getColor(0, Bridge::BLUE) << std::endl;
     }
-
-    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        currentValues[b].setAll(values);
-        bridge->setPWMlg(values, b);
-    }
+    currentValues.setAll(values);
+    bridge->setPWMlg(values);
     regularBuffer.reset();
     emergency = false;
 }
@@ -273,7 +270,7 @@ void Handler::insertNext(const std::string &data) {
         return;
     }
 
-    Bridge::BankColorValues values[Bridge::BANK_COUNT];
+    Bridge::BankColorValues values;
 
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
@@ -290,7 +287,7 @@ void Handler::insertNext(const std::string &data) {
             case Bridge::BLUE:
                 val = atoi(data.substr(pos, found - pos).c_str());
                 for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-                    values[b].setColor(i, val);
+                    values.setColor(b, i, val);
                 }
                 break;
 
@@ -306,19 +303,17 @@ void Handler::insertNext(const std::string &data) {
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         LOG(moba::DEBUG) <<
             "bank ["  << b << "] " <<
-            " white: " << values[b].getColor(Bridge::WHITE) <<
-            " green: " << values[b].getColor(Bridge::GREEN) <<
-            " red: " << values[b].getColor(Bridge::RED) <<
-            " blue: " << values[b].getColor(Bridge::BLUE) << std::endl;
+            " white: " << values.getColor(b, Bridge::WHITE) <<
+            " green: " << values.getColor(b, Bridge::GREEN) <<
+            " red: " << values.getColor(b, Bridge::RED) <<
+            " blue: " << values.getColor(b, Bridge::BLUE) << std::endl;
     }
     LOG(moba::DEBUG) << "duration: " << duration << std::endl;
 
-    boost::shared_ptr<ProcessData> item(new ProcessData());
+    boost::shared_ptr<ProcessData> item(new ProcessData(currentValues, values, durationOverride));
 
-    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        currentValues[b].setAll(values);
-        bridge->setPWMlg(values, b);
-    }
+    currentValues.setAll(values);
+    bridge->setPWMlg(values);
     regularBuffer.push(item);
 }
 
