@@ -38,7 +38,6 @@ class Controller : private boost::noncopyable {
         void setDirectValues(Bridge::BankColorValues values);
         bool next();
         void reset();
-        void setDuration(int duration);
         void resume();
 
         void emergencyStop(int brigthness, int duration);
@@ -48,8 +47,6 @@ class Controller : private boost::noncopyable {
 
 
         void setNextTarget(const ProcessData &newValues);
-
-        static const int DEFAULT_DURATION     = 0;
 
 
         const static Bridge::BankColor bcolor[];

@@ -64,12 +64,17 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        boost::shared_ptr<Bridge> bridge;
-        boost::shared_ptr<moba::IPC> ipc;
-        boost::shared_ptr<moba::SignalHandler> sigTerm;
+        static const int RANGE  = 4095;
+        static const int TOTAL_STEPS_COUNT  = RANGE * 10;
 
         static const int EMERGENCY_BRIGTHNESS = 2000;
         static const int EMERGENCY_DURATION   = 5;
+
+        static const int DEFAULT_DURATION     = 0;
+
+        boost::shared_ptr<Bridge> bridge;
+        boost::shared_ptr<moba::IPC> ipc;
+        boost::shared_ptr<moba::SignalHandler> sigTerm;
 
         void fetchNextMsg();
 
@@ -80,5 +85,7 @@ class Handler : private boost::noncopyable {
         Bridge::BankColorValues parseDirectMessageData(const std::string &data);
 
         bool emergency;
+        int duration;
+
         moba::Ringbuffer<ProcessData> regularBuffer;
 };

@@ -116,9 +116,6 @@ void Controller::setNewTarget(const ProcessData& newValues, bool immediately) {
     // FIXME: Set new values
 }
 
-void Controller::setDuration(int d) {
-    duration = static_cast<int>((d * 1000 * 1000) / TOTAL_STEPS_COUNT);
-}
 
 void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {

@@ -34,6 +34,7 @@ Handler::Handler(
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
 ) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), emergency(false) {
+    duration = DEFAULT_DURATION;
 }
 
 void Handler::run() {
@@ -148,17 +149,17 @@ void Handler::fetchNextMsg() {
                 controller->resume();
                 break;
             }
-
+            */
             case moba::IPC::CMD_SET_DURATION: {
                 LOG(moba::DEBUG) << "set duration... " << std::endl;
-                int duration = atoi(msg.mtext);
+                duration = atoi(msg.mtext);
                 LOG(moba::DEBUG) <<
                     "--> duration: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
-                controller->setDuration(duration);
+                duration = static_cast<int>((duration * 1000 * 1000) / Handler::TOTAL_STEPS_COUNT);
                 break;
             }
-            */
+
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
