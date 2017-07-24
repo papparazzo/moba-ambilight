@@ -248,25 +248,19 @@ void Handler::reset(const std::string &data) {
         for(int i = 0; i < Bridge::COLOR_COUNT ; ++i) {
             found = data.find(';', pos);
             val = atoi(data.substr(pos, found - pos).c_str());
-            if(val < Bridge::MIN_VALUE) {
-                val = Bridge::MIN_VALUE;
-            }
-            if(val > Bridge::MAX_VALUE) {
-                val = Bridge::MAX_VALUE;
-            }
-            values.value[i] = val;
+            values.setColor(val);
             pos = found + 1;
         }
         LOG(moba::DEBUG) <<
             "--> direct" <<
-            " white: " << values.value[Bridge::WHITE] <<
-            " green: " << values.value[Bridge::GREEN] <<
-            " red: " << values.value[Bridge::RED] <<
-            " blue: " << values.value[Bridge::BLUE] << std::endl;
+            " white: " << values.getColor(Bridge::WHITE) <<
+            " green: " << values.getColor(Bridge::GREEN) <<
+            " red: " << values.getColor(Bridge::RED) <<
+            " blue: " << values.getColor(Bridge::BLUE) << std::endl;
     }
 
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        currentValues[b].value = values;
+        currentValues[b].setAll(values);
         bridge->setPWMlg(values, b);
     }
     regularBuffer.reset();
@@ -279,13 +273,12 @@ void Handler::insertNext(const std::string &data) {
         return;
     }
 
-
-
-    NewValues values;
+    Bridge::BankColorValues values[Bridge::BANK_COUNT];
 
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
 
+    int durationOverride = duration;
     int val;
 
     for(int i = 0; i < 6; ++i) {
@@ -296,53 +289,37 @@ void Handler::insertNext(const std::string &data) {
             case Bridge::RED:
             case Bridge::BLUE:
                 val = atoi(data.substr(pos, found - pos).c_str());
-                if(val < Bridge::MIN_VALUE) {
-                    val = Bridge::MIN_VALUE;
-                }
-                if(val > Bridge::MAX_VALUE) {
-                    val = Bridge::MAX_VALUE;
-                }
-                for(int j = 0; j < Bridge::BANK_COUNT; ++j) {
-                    values.values[i][j] = val;
+                for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+                    values[b].setColor(i, val);
                 }
                 break;
 
             case 5:
-                values.duration = atoi(data.substr(pos, found - pos).c_str());
-                break;
-
-            case 6:
-                switch(data.substr(pos, found - pos)[0]) {
-                    case 'W':
-                        values.wobble = true;
-                        break;
-
-                    default:
-                        values.wobble = false;
-                        break;
-                }
+                durationOverride = atoi(data.substr(pos, found - pos).c_str());
                 break;
         }
         pos = found + 1;
     }
-    for(int t = 0; t < Bridge::BANK_COUNT; ++t) {
+
+    LOG(moba::DEBUG) << "--> targets " << std::endl;
+
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         LOG(moba::DEBUG) <<
-            "--> targets " <<
-            " white: " << values.values[Bridge::WHITE][t] <<
-            " green: " << values.values[Bridge::GREEN][t] <<
-            " red: " << values.values[Bridge::RED][t] <<
-            " blue: " << values.values[Bridge::BLUE][t] << std::endl;
+            "bank ["  << b << "] " <<
+            " white: " << values[b].getColor(Bridge::WHITE) <<
+            " green: " << values[b].getColor(Bridge::GREEN) <<
+            " red: " << values[b].getColor(Bridge::RED) <<
+            " blue: " << values[b].getColor(Bridge::BLUE) << std::endl;
     }
-    LOG(moba::DEBUG) <<
-        "--> wobble: " << (values.wobble ? "on" : "off") << std::endl;
-    return values;
+    LOG(moba::DEBUG) << "duration: " << duration << std::endl;
 
+    boost::shared_ptr<ProcessData> item(new ProcessData());
 
-
-
-    regularBuffer.push(newValues);
-    * controller->setNewTarget(parseMessageData(msg.mtext), false);
-
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        currentValues[b].setAll(values);
+        bridge->setPWMlg(values, b);
+    }
+    regularBuffer.push(item);
 }
 
 

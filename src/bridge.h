@@ -64,18 +64,36 @@ class Bridge : private boost::noncopyable {
         };
 
         struct BankColorValues {
-            BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
-                value[WHITE] = white;
-                value[GREEN] = green;
-                value[RED]   = red;
-                value[BLUE]  = blue;
-            }
-            BankColorValues(const BankColorValues &orig) {
-               for(int c = 0; c < COLOR_COUNT; ++c) {
-                   value[c] = orig.value[c];
-               }
-            }
-            int value[COLOR_COUNT];
+            public:
+                BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
+                    value[WHITE] = white;
+                    value[GREEN] = green;
+                    value[RED]   = red;
+                    value[BLUE]  = blue;
+                }
+                BankColorValues(const BankColorValues &orig) {
+                    setAll(orig);
+                }
+                void setColor(BankColor color, int val) {
+                    if(val < Bridge::MIN_VALUE) {
+                        val = Bridge::MIN_VALUE;
+                    }
+                    if(val > Bridge::MAX_VALUE) {
+                        val = Bridge::MAX_VALUE;
+                    }
+                    value[color] = val;
+                }
+                void setAll(const BankColorValues &val) {
+                   for(int c = 0; c < COLOR_COUNT; ++c) {
+                       value[c] = val.value[c];
+                   }
+                }
+                int getColor(BankColor color) {
+                    return value[color];
+                }
+
+            private:
+                int value[COLOR_COUNT];
         };
 
         Bridge(int address = 0x40);

@@ -51,13 +51,24 @@ class ProcessData {
         ProcessData();
         virtual ~ProcessData();
 
+        unsigned int getObjectId() const;
+
+
+        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &start, int dur) {
+
+        }
+
+
+    protected:
+/*
         Bridge::BankColorValues stepWidth[Bridge::BANK_COUNT];
         Bridge::BankColorValues current[Bridge::BANK_COUNT];
         Bridge::BankColorValues target[Bridge::BANK_COUNT];
+ */
 
         int duration;
 
-        unsigned int getObjectId() const;
+
 
         Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
 
