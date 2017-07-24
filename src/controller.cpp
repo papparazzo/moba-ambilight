@@ -99,30 +99,6 @@ void Controller::releaseEmergencyStop() {
     resume();
 }
 
-void Controller::runTestMode() {
-    bridge->setPWMlg(Bridge::BLUE, 0);
-    bridge->setPWMlg(Bridge::GREEN, 0);
-    bridge->setPWMlg(Bridge::WHITE, 0);
-    bridge->setPWMlg(Bridge::RED, 211);
-    sleep(1);
-    bridge->setPWMlg(Bridge::RED, 0);
-    for(int i = 0; i < 4; ++i) {
-        for(int j = 0; j < 4; ++j) {
-            for(int k = 0; k < 2; ++k) {
-                bridge->setData(Controller::bcolor[j], i, 0, 150);
-                delay(500);
-                bridge->setData(Controller::bcolor[j], i, 0, 600);
-                delay(500);
-            }
-            bridge->setData(Controller::bcolor[j], i, 0, 0);
-        }
-    }
-    bridge->setPWMlg(Bridge::GREEN, 211);
-    sleep(1);
-    bridge->setAllOff();
-    sleep(1);
-}
-
 void Controller::reset() {
     regularBuffer.reset();
     bridge->setAllOff();

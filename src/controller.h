@@ -26,29 +26,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <moba/ringbuffer.h>
-
 #include "bridge.h"
 #include "processdata.h"
-
-class ControllerException : public std::exception {
-
-    public:
-        virtual ~ControllerException() throw() {
-        }
-
-        ControllerException(const std::string &what) {
-            what__ = what;
-        }
-
-        virtual const char* what() const throw() {
-            return what__.c_str();
-        }
-
-    private:
-        std::string what__;
-};
-
 
 class Controller : private boost::noncopyable {
     public:
@@ -60,7 +39,6 @@ class Controller : private boost::noncopyable {
         bool next();
         void reset();
         void setDuration(int duration);
-        void runTestMode();
         void resume();
 
         void emergencyStop(int brigthness, int duration);
@@ -78,9 +56,7 @@ class Controller : private boost::noncopyable {
 
         int duration;
 
-        boost::shared_ptr<Bridge> bridge;
 
-        moba::Ringbuffer<ProcessData> regularBuffer;
 
         bool interrupted;
         bool halted;

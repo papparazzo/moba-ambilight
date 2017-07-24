@@ -28,12 +28,11 @@
 #include <string>
 #include <exception>
 
+#include "bridge.h"
 #include "processdata.h"
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
-
-#include "controller.h"
 
 class HandlerException : public std::exception {
 
@@ -57,21 +56,15 @@ class HandlerException : public std::exception {
 class Handler : private boost::noncopyable {
     public:
         Handler(
-            boost::shared_ptr<Controller> controller,
+            boost::shared_ptr<Bridge> bridge,
             boost::shared_ptr<moba::IPC> ipc,
             boost::shared_ptr<moba::SignalHandler> sigTerm
         );
 
         void run();
 
-        struct NewValues {
-            Bridge::BankColorValues values[4];
-            bool wobble;
-            int duration;
-        };
-
     protected:
-        boost::shared_ptr<Controller> controller;
+        boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;
         boost::shared_ptr<moba::SignalHandler> sigTerm;
 
@@ -79,9 +72,13 @@ class Handler : private boost::noncopyable {
         static const int EMERGENCY_DURATION   = 5;
 
         void fetchNextMsg();
+
+        void runTestMode();
+
         void runEmergencyMode(const std::string &data);
         ProcessData parseMessageData(const std::string &data);
         Bridge::BankColorValues parseDirectMessageData(const std::string &data);
 
         bool emergency;
+        moba::Ringbuffer<ProcessData> regularBuffer;
 };

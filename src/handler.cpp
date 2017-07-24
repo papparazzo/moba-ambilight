@@ -23,25 +23,28 @@
 #include "handler.h"
 
 #include <moba/log.h>
+#include <moba/ringbuffer.h>
+
 #include <wiringPi.h>
 #include <string.h>
 #include <sys/time.h>
 
 Handler::Handler(
-    boost::shared_ptr<Controller> controller,
+    boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), sigTerm(sigTerm), controller(controller), emergency(false) {
+) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), emergency(false) {
 }
 
 void Handler::run() {
     do {
         fetchNextMsg();
+        /*
         if(!controller->next()) {
             usleep(50000);
             continue;
         }
-
+        */
     } while(true);
 }
 
@@ -66,6 +69,7 @@ void Handler::fetchNextMsg() {
         }
 
         switch(msg.mtype) {
+            /*
             case moba::IPC::CMD_EMERGENCY_STOP: {
                 LOG(moba::DEBUG) << "emergency..." << std::endl;
                 if(emergency) {
@@ -87,14 +91,14 @@ void Handler::fetchNextMsg() {
                 emergency = false;
                 break;
             }
-
+            */
             case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
-                controller->runTestMode();
+                runTestMode();
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
                 return;
             }
-
+            /*
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
                 controller->setNewTarget(parseMessageData(msg.mtext), false);
@@ -154,7 +158,7 @@ void Handler::fetchNextMsg() {
                 controller->setDuration(duration);
                 break;
             }
-
+            */
             default:
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
@@ -164,6 +168,44 @@ void Handler::fetchNextMsg() {
         }
     }
 }
+
+void Handler::runTestMode() {
+    const Bridge::BankColor bcolor[] = {
+        Bridge::BLUE,
+        Bridge::GREEN,
+        Bridge::RED,
+        Bridge::WHITE
+    };
+
+    bridge->setPWMlg(Bridge::BLUE, 0);
+    bridge->setPWMlg(Bridge::GREEN, 0);
+    bridge->setPWMlg(Bridge::WHITE, 0);
+    bridge->setPWMlg(Bridge::RED, 211);
+    sleep(1);
+    bridge->setPWMlg(Bridge::RED, 0);
+    for(int i = 0; i < 4; ++i) {
+        for(int j = 0; j < 4; ++j) {
+            for(int k = 0; k < 2; ++k) {
+                bridge->setData(bcolor[j], i, 0, 150);
+                delay(500);
+                bridge->setData(bcolor[j], i, 0, 600);
+                delay(500);
+            }
+            bridge->setData(bcolor[j], i, 0, 0);
+        }
+    }
+    bridge->setPWMlg(Bridge::GREEN, 211);
+    sleep(1);
+    bridge->setAllOff();
+    sleep(1);
+}
+
+
+
+
+
+
+
 
 void Handler::runEmergencyMode(const std::string &data) {
     int duration = EMERGENCY_DURATION;
