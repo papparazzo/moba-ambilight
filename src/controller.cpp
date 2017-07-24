@@ -25,75 +25,6 @@
 #include "controller.h"
 #include <wiringPi.h>
 
-namespace {
-    const double PI = 3.1415926535897932384626433832795;
-}
-
-const Bridge::BankColor Controller::bcolor[] = {
-    Bridge::BLUE,
-    Bridge::GREEN,
-    Bridge::RED,
-    Bridge::WHITE
-};
-
-Controller::Controller(boost::shared_ptr<Bridge> b) {
-
-    halted      = false;
-    interrupted = false;
-}
-
-Controller::~Controller() {
-}
-
-bool Controller::next() {
-    if(!regularBuffer.hasItems()) {
-        return false;
-    }
-
-    ProcessData regular = regularBuffer.pop();
-    ProcessData interrupt;
-
-    int i;
-    do {
-        ++i;
-        //delayMicroseconds(duration + current.duration);
-        if(i % regular.duration) {
-            stepRegular();
-        }
-        if(interrupted && i % interrupt.duration) {
-            stepInterrupt();
-        }
-    } while(true);
-
-/*
-
-    do {
-        delayMicroseconds(duration + current.duration);
-        plasma->next();
-    } while(true);
-
-
-    do {
-        fetchNextMsg();
-        delayMicroseconds(duration + current.duration);
-        blas();
-
-
-    } while(true);
- **/
-}
-
-void Controller::resume() {
-    interrupted = false;
-}
-
-void Controller::emergencyStop(int brigthness, int duration) {
-}
-
-void Controller::releaseEmergencyStop() {
-    resume();
-}
-
 void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
         throw ControllerException("amplitude and offset to high!");
@@ -145,9 +76,6 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
     return range[color].amplitude * v + range[color].offset;
 }
 
-
-
-
 void Controller::stepRegular() {
 
     if(halted) {
@@ -178,6 +106,3 @@ void Controller::stepRegular() {
 
 }
 
-void Controller::stepInterrupt() {
-
-}

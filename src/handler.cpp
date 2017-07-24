@@ -41,7 +41,45 @@ void Handler::run() {
     do {
         fetchNextMsg();
         /*
-        if(!controller->next()) {
+    if(!regularBuffer.hasItems()) {
+        return false;
+    }
+
+    ProcessData regular = regularBuffer.pop();
+    ProcessData interrupt;
+
+    int i;
+    do {
+        ++i;
+        //delayMicroseconds(duration + current.duration);
+        if(i % regular.duration) {
+            stepRegular();
+        }
+        if(interrupted && i % interrupt.duration) {
+            stepInterrupt();
+        }
+    } while(true);
+
+/*
+
+    do {
+        delayMicroseconds(duration + current.duration);
+        plasma->next();
+    } while(true);
+
+
+    do {
+        fetchNextMsg();
+        delayMicroseconds(duration + current.duration);
+        blas();
+
+
+    } while(true);
+
+
+         *
+         *
+         * if(!controller->next()) {
             usleep(50000);
             continue;
         }
@@ -99,14 +137,13 @@ void Handler::fetchNextMsg() {
                 LOG(moba::DEBUG) << "testing... finished!" << std::endl;
                 return;
             }
-            /*
+
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
-                       regularBuffer.push(newValues);
-             * controller->setNewTarget(parseMessageData(msg.mtext), false);
+                insertNext(msg.mtext);
                 break;
             }
-*/
+
             case moba::IPC::CMD_HALT: {
                 LOG(moba::DEBUG) << "halt..." << std::endl;
                 if(halted) {
@@ -236,58 +273,15 @@ void Handler::reset(const std::string &data) {
     emergency = false;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void Handler::runEmergencyMode(const std::string &data) {
-    int duration = EMERGENCY_DURATION;
-    int brigthness = EMERGENCY_BRIGTHNESS;
-
-    if(data != "") {
-        std::string::size_type pos = 0;
-        std::string::size_type found = data.find(';', pos);
-        int val = atoi(data.substr(pos, found - pos).c_str());
-        if(val < Bridge::MIN_VALUE) {
-            val = Bridge::MIN_VALUE;
-        }
-        if(val > Bridge::MAX_VALUE) {
-            val = Bridge::MAX_VALUE;
-        }
-        brigthness = val;
-        if(found != std::string::npos) {
-            duration = atoi(data.substr(found + 1).c_str());
-        }
-    }
-    LOG(moba::DEBUG) <<
-        "--> targets" <<
-        " white: " << brigthness << " duration: " << duration << std::endl;
-    controller->emergencyStop(brigthness, duration);
-}
-
-
-ProcessData Handler::parseMessageData(const std::string &data) {
-    NewValues values;
+void Handler::insertNext(const std::string &data) {
     if(data == "") {
-        return values;
+        LOG(moba::WARNING) << "no values given!" << std::endl;
+        return;
     }
+
+
+
+    NewValues values;
 
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
@@ -342,4 +336,57 @@ ProcessData Handler::parseMessageData(const std::string &data) {
     LOG(moba::DEBUG) <<
         "--> wobble: " << (values.wobble ? "on" : "off") << std::endl;
     return values;
+
+
+
+
+    regularBuffer.push(newValues);
+    * controller->setNewTarget(parseMessageData(msg.mtext), false);
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Handler::runEmergencyMode(const std::string &data) {
+    int duration = EMERGENCY_DURATION;
+    int brigthness = EMERGENCY_BRIGTHNESS;
+
+    if(data != "") {
+        std::string::size_type pos = 0;
+        std::string::size_type found = data.find(';', pos);
+        int val = atoi(data.substr(pos, found - pos).c_str());
+        if(val < Bridge::MIN_VALUE) {
+            val = Bridge::MIN_VALUE;
+        }
+        if(val > Bridge::MAX_VALUE) {
+            val = Bridge::MAX_VALUE;
+        }
+        brigthness = val;
+        if(found != std::string::npos) {
+            duration = atoi(data.substr(found + 1).c_str());
+        }
+    }
+    LOG(moba::DEBUG) <<
+        "--> targets" <<
+        " white: " << brigthness << " duration: " << duration << std::endl;
+    controller->emergencyStop(brigthness, duration);
+}
+

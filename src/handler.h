@@ -78,12 +78,8 @@ class Handler : private boost::noncopyable {
 
         void fetchNextMsg();
         void runTestMode();
+        void insertNext(const std::string &data);
         void reset(const std::string &data);
-
-        /*
-        void runEmergencyMode(const std::string &data);
-        ProcessData parseMessageData(const std::string &data);
-         */
 
     private:
         bool emergency;
