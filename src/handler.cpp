@@ -108,7 +108,6 @@ void Handler::fetchNextMsg() {
         }
 
         switch(msg.mtype) {
-            /*
             case moba::IPC::CMD_EMERGENCY_STOP: {
                 LOG(moba::DEBUG) << "emergency..." << std::endl;
                 if(emergency) {
@@ -126,11 +125,11 @@ void Handler::fetchNextMsg() {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                     break;
                 }
-                controller->releaseEmergencyStop();
+                releaseEmergencyStop();
                 emergency = false;
                 break;
             }
-            */
+
             case moba::IPC::CMD_TEST: {
                 LOG(moba::DEBUG) << "testing... " << std::endl;
                 runTestMode();
@@ -317,26 +316,6 @@ void Handler::insertNext(const std::string &data) {
     regularBuffer.push(item);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void Handler::runEmergencyMode(const std::string &data) {
     int duration = EMERGENCY_DURATION;
     int brigthness = EMERGENCY_BRIGTHNESS;
@@ -359,6 +338,9 @@ void Handler::runEmergencyMode(const std::string &data) {
     LOG(moba::DEBUG) <<
         "--> targets" <<
         " white: " << brigthness << " duration: " << duration << std::endl;
-    controller->emergencyStop(brigthness, duration);
+    //controller->emergencyStop(brigthness, duration);
 }
 
+void Handler::releaseEmergencyStop() {
+
+}

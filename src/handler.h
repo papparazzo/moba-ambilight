@@ -81,6 +81,9 @@ class Handler : private boost::noncopyable {
         void insertNext(const std::string &data);
         void reset(const std::string &data);
 
+        void runEmergencyMode(const std::string &data);
+        void releaseEmergencyStop();
+
     private:
         bool emergency;
         int duration;
