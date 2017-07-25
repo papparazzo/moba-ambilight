@@ -40,50 +40,24 @@ Handler::Handler(
 void Handler::run() {
     do {
         fetchNextMsg();
-        /*
-    if(!regularBuffer.hasItems()) {
-        return false;
-    }
 
-    ProcessData regular = regularBuffer.pop();
-    ProcessData interrupt;
-
-    int i;
-    do {
-        ++i;
-        //delayMicroseconds(duration + current.duration);
-        if(i % regular.duration) {
-            stepRegular();
-        }
-        if(interrupted && i % interrupt.duration) {
-            stepInterrupt();
-        }
-    } while(true);
-
-/*
-
-    do {
-        delayMicroseconds(duration + current.duration);
-        plasma->next();
-    } while(true);
-
-
-    do {
-        fetchNextMsg();
-        delayMicroseconds(duration + current.duration);
-        blas();
-
-
-    } while(true);
-
-
-         *
-         *
-         * if(!controller->next()) {
+        if(!regularBuffer.hasItems()) {
             usleep(50000);
             continue;
         }
-        */
+
+        boost::shared_ptr<ProcessData> next = regularBuffer.pop();
+
+        int i = 0;
+        do {
+            if(i % 1000) {
+                fetchNextMsg();
+            }
+            delayMicroseconds(duration + current.duration);
+            if(!next->next()) {
+                break;
+            }
+        } while(true);
     } while(true);
 }
 
@@ -312,7 +286,6 @@ void Handler::insertNext(const std::string &data) {
     boost::shared_ptr<ProcessData> item(new ProcessData(currentValues, values, durationOverride));
 
     currentValues.setAll(values);
-    bridge->setPWMlg(values);
     regularBuffer.push(item);
 }
 

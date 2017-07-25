@@ -24,9 +24,21 @@
 
 unsigned int ProcessData::counter = 0;
 
-ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &target, int dur) {
+ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, int dur) :
+current(start), target(end)
+{
     objNb = counter++;
-    
+
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        for(int c = 0; c < Bridge::COLOR_COUNT; ++c) {
+            int delta = end.getColor(b, c) - start.getColor(b, c);
+            if(delta) {
+                stepWidth.setColor(b, c, TOTAL_STEPS_COUNT / delta);
+            } else {
+                stepWidth.setColor(b, c, 0);
+            }
+        }
+    }
 }
 
 ProcessData::~ProcessData() {
@@ -42,15 +54,6 @@ Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
         throw ProcessDataException("out of range");
     }
 
-}
-
-
-/**
- Bridge::BankColorValues Controller::getBankColors(int stepsAhead, int bank) {
-    if(counter + stepsAhead > TOTAL_STEPS_COUNT) {
-        // return getFuture(counter + stepsAhead - TOTAL_STEPS_COUNT);
-    }
-
     if(!stepWidth[c] || i % stepWidth[c]) {
         return;
     }
@@ -64,34 +67,48 @@ Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
     //stepsAhead * stepWidth counter
 }
 
- * /
 
-void Controller::setNextTarget(const TargetValues &newValues) {
-    //current.wobble = false;
-    for(int i = 0; i < 4; ++i) {
-        /*
-        if(!duration) {
-            //current.targetIntensity[i] = newValues.targetIntensity[i];
-            //bridge->setPWMlg(Controller::bcolor[i], current.targetIntensity[i]);
+bool ProcessData::next() {
+    
+}
+
+/**
+
+
+
+
+    for(int b = 0; b < 3; ++b) {
+        for(int c = 0; c < 4; ++c) {
+            if(!stepWidth[c] || i % stepWidth[c]) {
+                return;
+            }
+            if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
+                current.targetIntensity[c]++;
+            }
+            if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
+                current.targetIntensity[c]--;
+            }
+            if(interrupted) {
+                bridge->setPWMlg(Controller::bcolor[c], b, current.targetIntensity[c]);
+            }
+        }
+    }
+
+ *
+
+
+
+
+
+
         } else if(newValues.wobble) {
             //current.wobble = true;
             //setAmlitudeAndOffset((Bridge::BankColor)i, newValues.targetIntensity[i], current.targetIntensity[i]);
-/*
+
             stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
         } else {
             stepWidth[i] = 0;
  */
-
-/*
-
-        } else if(newValues.targetIntensity[i] - current.targetIntensity[i]) {
-            stepWidth[i] = TOTAL_STEPS_COUNT / (newValues.targetIntensity[i] - current.targetIntensity[i]);
-        } else {
-            stepWidth[i] = 0;
-        }
-    }
-}
- * */
 
 
 void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
@@ -143,35 +160,5 @@ double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
     }
 
     return range[color].amplitude * v + range[color].offset;
-}
-
-void Controller::stepRegular() {
-
-    if(halted) {
-        return;
-    }
-
-
-/*
-    for(int b = 0; b < 3; ++b) {
-        for(int c = 0; c < 4; ++c) {
-            if(!stepWidth[c] || i % stepWidth[c]) {
-                return;
-            }
-            if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
-                current.targetIntensity[c]++;
-            }
-            if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
-                current.targetIntensity[c]--;
-            }
-            if(interrupted) {
-                bridge->setPWMlg(Controller::bcolor[c], b, current.targetIntensity[c]);
-            }
-        }
-    }
-*/
-
-    i = i++ % TOTAL_STEPS_COUNT;
-
 }
 

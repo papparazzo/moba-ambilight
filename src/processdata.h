@@ -48,37 +48,22 @@ class ProcessData {
         static const int RANGE = Bridge::MAX_VALUE;
         static const int TOTAL_STEPS_COUNT = RANGE * 10;
 
-        ProcessData();
+        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, int dur);
         virtual ~ProcessData();
 
         unsigned int getObjectId() const;
 
-
-        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &target, int dur);
-
+        Bridge::BankColorValues getBankColors(int stepsAhead);
+        bool next();
 
     protected:
-
         Bridge::BankColorValues stepWidth;
         Bridge::BankColorValues current;
         Bridge::BankColorValues target;
 
         int duration;
 
-
-
-        Bridge::BankColorValues getBankColors(int stepsAhead, int bank);
-
     private:
         unsigned int objNb;
         static unsigned int counter;
-};
-
-class PrcoessDataWobble : public ProcessData {
-    public:
-
-};
-
-class ProcessDataNormal : public ProcessData {
-    public:
 };
