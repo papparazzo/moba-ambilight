@@ -58,16 +58,17 @@ Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
         throw ProcessDataException("out of range");
     }
 
-    if(!stepWidth[c] || i % stepWidth[c]) {
-        return;
+    for(int c = 0; c < Bridge::COLOR_COUNT; ++c) {
+        if(!stepWidth.getColor(bank, c) || i % stepWidth.getColor(bank, c)) {
+            continue;
+        }
+        if(stepWidth.getColor(bank, c) > 0 && current.getColor(bank, c) < Controller::RANGE) {
+            current.increment(bank, c);
+        }
+        if(stepWidth.getColor(bank, c) < 0 && current.getColor(bank, c) > 0) {
+            current.decrement(bank, c);
+        }
     }
-    if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
-        current.targetIntensity[c]++;
-    }
-    if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
-        current.targetIntensity[c]--;
-    }
-
     //stepsAhead * stepWidth counter
 }
 
