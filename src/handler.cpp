@@ -53,7 +53,7 @@ void Handler::run() {
             if(i % 1000) {
                 fetchNextMsg();
             }
-            delayMicroseconds(duration + current.duration);
+            delayMicroseconds(duration + next->getDuration());
             if(!next->next()) {
                 break;
             }

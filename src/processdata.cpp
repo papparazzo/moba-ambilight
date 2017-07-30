@@ -24,8 +24,8 @@
 
 unsigned int ProcessData::counter = 0;
 
-ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, int dur) :
-current(start), target(end)
+ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, unsigned int dur) :
+current(start), target(end), duration(dur)
 {
     objNb = counter++;
 
@@ -49,6 +49,10 @@ unsigned int ProcessData::getObjectId() const {
     return objNb;
 }
 
+unsigned int ProcessData::getDuration() const {
+    return duration;
+}
+
 Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
     if(stepsAhead > TOTAL_STEPS_COUNT) {
         throw ProcessDataException("out of range");
@@ -69,7 +73,7 @@ Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
 
 
 bool ProcessData::next() {
-    
+
 }
 
 /**
