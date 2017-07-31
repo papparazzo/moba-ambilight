@@ -53,24 +53,23 @@ double ProcessDataWobble::d(int bank, double t) {
     bridge->setPWMlg(Bridge::WHITE, bank, getPlasmaValue(Bridge::WHITE, bank, t));
 }
 
-
-double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
+double ProcessDataWobble::getPlasmaValue(BankColorValues::BankColor color, int bank, double t) {
     double v = std::sin(t + 10.0 * bank);
 
     switch(color) {
-        case Bridge::BLUE:
+        case BankColorValues::BLUE:
             v = 1 + std::sin(v * PI + 4 * PI / 3);
             break;
 
-        case Bridge::RED:
+        case BankColorValues::RED:
             v = 1 + std::sin(v * PI);
             break;
 
-        case Bridge::GREEN:
+        case BankColorValues::GREEN:
             v = 1 + std::sin(v * PI + 2 * PI / 3);
             break;
 
-        case Bridge::WHITE:
+        case BankColorValues::WHITE:
             v = 1 + std::sin(v * PI + 8 * PI / 3);
             break;
     }

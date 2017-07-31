@@ -32,7 +32,7 @@ class ProcessDataWobble : ProcessData {
 
     protected:
         double d(int bank, double t);
-
+        double getPlasmaValue(BankColorValues::BankColor color, int bank, double t);
     private:
 
 };

@@ -28,6 +28,8 @@ class ProcessDataPlain : public ProcessData {
     public:
         ProcessDataPlain(const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
+        bool next(bool setOutput);
+
     private:
 };
 
