@@ -33,7 +33,7 @@ Handler::Handler(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), emergency(false) {
+) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), emergency(false), interuptMode(false) {
     duration = DEFAULT_DURATION;
 }
 
@@ -54,9 +54,16 @@ void Handler::run() {
                 fetchNextMsg();
             }
             delayMicroseconds(duration + next->getDuration());
-            if(!next->next()) {
+
+            if(emergency) {
+                continue;
+            }
+
+            if(!next->next(!interuptMode)) {
                 break;
             }
+            
+
         } while(true);
     } while(true);
 }
@@ -146,7 +153,7 @@ void Handler::fetchNextMsg() {
                 LOG(moba::DEBUG) << "terminate... " << std::endl;
                 throw HandlerException("terminate received");
             }
-            /*
+
             case moba::IPC::CMD_INTERRUPT: {
                 LOG(moba::DEBUG) << "interrupt... " << std::endl;
                 controller->setNewTarget(parseMessageData(msg.mtext), true);
@@ -158,7 +165,7 @@ void Handler::fetchNextMsg() {
                 controller->resume();
                 break;
             }
-            */
+
             case moba::IPC::CMD_SET_DURATION: {
                 LOG(moba::DEBUG) << "set duration... " << std::endl;
                 duration = atoi(msg.mtext);
@@ -311,7 +318,7 @@ void Handler::runEmergencyMode(const std::string &data) {
     LOG(moba::DEBUG) <<
         "--> targets" <<
         " white: " << brightness << " duration: " << duration << std::endl;
-    //controller->emergencyStop(brightness, duration);
+    controller->emergencyStop(brightness, duration);
 }
 
 void Handler::releaseEmergencyStop() {

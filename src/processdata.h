@@ -48,20 +48,19 @@ class ProcessData {
         static const int RANGE = Bridge::MAX_VALUE;
         static const int TOTAL_STEPS_COUNT = RANGE * 10;
 
-        ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, unsigned int dur = 0);
         virtual ~ProcessData();
 
         unsigned int getObjectId() const;
 
-        Bridge::BankColorValues getBankColors(int stepsAhead);
-        bool next();
+        virtual BankColorValues getBankColors(int stepsAhead) = 0;
+        virtual bool next(bool setOutput) = 0;
 
         unsigned int getDuration();
 
     protected:
-        Bridge::BankColorValues stepWidth;
-        Bridge::BankColorValues current;
-        Bridge::BankColorValues target;
+        BankColorValues stepWidth;
+        BankColorValues current;
+        BankColorValues target;
 
         unsigned int duration;
 

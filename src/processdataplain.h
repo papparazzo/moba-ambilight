@@ -22,30 +22,12 @@
 
 #pragma once
 
-class BankColorValues {
+#include "processdata.h"
+
+class ProcessDataPlain : public ProcessData {
     public:
-        enum BankColor {
-            WHITE       = 0,
-            GREEN       = 1,
-            RED         = 2,
-            BLUE        = 3,
-            COLOR_COUNT = 4
-        };
+        ProcessDataPlain(const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
-        static const int BANK_COUNT = 4;
-
-        BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0);
-        BankColorValues(const BankColorValues &orig);
-
-        ~BankColorValues();
-
-        void setColor(BankColor color, int val);
-        void setColor(int bank, BankColor color, int val);
-        void setAll(const BankColorValues &val);
-        int getColor(int bank, BankColor color);
-        void increment(int bank, BankColor color);
-        void decrement(int bank, BankColor color);
-
-    protected:
-        int value[BANK_COUNT][COLOR_COUNT];
+    private:
 };
+

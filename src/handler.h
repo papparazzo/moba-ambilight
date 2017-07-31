@@ -87,8 +87,10 @@ class Handler : private boost::noncopyable {
 
     private:
         bool emergency;
+        bool interuptMode;
         int duration;
 
         moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
         BankColorValues currentValues;
+        BankColorValues interuptValues;
 };

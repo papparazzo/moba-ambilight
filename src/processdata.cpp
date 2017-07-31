@@ -24,23 +24,6 @@
 
 unsigned int ProcessData::counter = 0;
 
-ProcessData::ProcessData(const Bridge::BankColorValues &start, const Bridge::BankColorValues &end, unsigned int dur) :
-current(start), target(end), duration(dur)
-{
-    objNb = counter++;
-
-    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        for(int c = 0; c < Bridge::COLOR_COUNT; ++c) {
-            int delta = end.getColor(b, c) - start.getColor(b, c);
-            if(delta) {
-                stepWidth.setColor(b, c, TOTAL_STEPS_COUNT / delta);
-            } else {
-                stepWidth.setColor(b, c, 0);
-            }
-        }
-    }
-}
-
 ProcessData::~ProcessData() {
 
 }
@@ -53,34 +36,29 @@ unsigned int ProcessData::getDuration() const {
     return duration;
 }
 
-Bridge::BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
-    if(stepsAhead > TOTAL_STEPS_COUNT) {
-        throw ProcessDataException("out of range");
-    }
 
-    for(int c = 0; c < Bridge::COLOR_COUNT; ++c) {
-        if(!stepWidth.getColor(bank, c) || i % stepWidth.getColor(bank, c)) {
-            continue;
-        }
-        if(stepWidth.getColor(bank, c) > 0 && current.getColor(bank, c) < Controller::RANGE) {
-            current.increment(bank, c);
-        }
-        if(stepWidth.getColor(bank, c) < 0 && current.getColor(bank, c) > 0) {
-            current.decrement(bank, c);
+
+
+
+ProcessData::ProcessData(const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
+current(start), target(end), duration(dur)
+{
+    objNb = counter++;
+
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
+            int delta = end.getColor(b, c) - start.getColor(b, c);
+            if(delta) {
+                stepWidth.setColor(b, c, TOTAL_STEPS_COUNT / delta);
+            } else {
+                stepWidth.setColor(b, c, 0);
+            }
         }
     }
-    //stepsAhead * stepWidth counter
 }
 
-
-bool ProcessData::next() {
-
-}
 
 /**
-
-
-
 
     for(int b = 0; b < 3; ++b) {
         for(int c = 0; c < 4; ++c) {
@@ -114,56 +92,4 @@ bool ProcessData::next() {
         } else {
             stepWidth[i] = 0;
  */
-
-
-void Controller::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
-    if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
-        throw ControllerException("amplitude and offset to high!");
-    }
-
-    if(offset < Bridge::MIN_VALUE) {
-        throw ControllerException("amplitude and offset to low!");
-    }
-
-    range[color].amplitude =  amplitude;
-    range[color].offset = offset;
-}
-
-double Controller::d(int bank, double t) {
-    bridge->setPWMlg(Bridge::GREEN, bank, getPlasmaValue(Bridge::GREEN, bank, t));
-    bridge->setPWMlg(Bridge::RED,   bank, getPlasmaValue(Bridge::RED,   bank, t));
-    bridge->setPWMlg(Bridge::BLUE,  bank, getPlasmaValue(Bridge::BLUE,  bank, t));
-    bridge->setPWMlg(Bridge::WHITE, bank, getPlasmaValue(Bridge::WHITE, bank, t));
-}
-
-void Controller::plasmanext() {
-    counter = ++counter % 200000;
-    d(0, (double)counter * PI / 1000);  // right
-    d(1, (double)counter * PI / 1000);  // center
-    d(2, (double)counter * PI / 1000);  // left
-}
-
-double Controller::getPlasmaValue(Bridge::BankColor color, int bank, double t) {
-    double v = std::sin(t + 10.0 * bank);
-
-    switch(color) {
-        case Bridge::BLUE:
-            v = 1 + std::sin(v * PI + 4 * PI / 3);
-            break;
-
-        case Bridge::RED:
-            v = 1 + std::sin(v * PI);
-            break;
-
-        case Bridge::GREEN:
-            v = 1 + std::sin(v * PI + 2 * PI / 3);
-            break;
-
-        case Bridge::WHITE:
-            v = 1 + std::sin(v * PI + 8 * PI / 3);
-            break;
-    }
-
-    return range[color].amplitude * v + range[color].offset;
-}
 
