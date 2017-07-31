@@ -180,19 +180,19 @@ void Handler::fetchNextMsg() {
 }
 
 void Handler::runTestMode() {
-    const Bridge::BankColor bcolor[] = {
-        Bridge::BLUE,
-        Bridge::GREEN,
-        Bridge::RED,
-        Bridge::WHITE
+    const BankColorValues::BankColor bcolor[] = {
+        BankColorValues::BLUE,
+        BankColorValues::GREEN,
+        BankColorValues::RED,
+        BankColorValues::WHITE
     };
 
-    bridge->setPWMlg(Bridge::BLUE, 0);
-    bridge->setPWMlg(Bridge::GREEN, 0);
-    bridge->setPWMlg(Bridge::WHITE, 0);
-    bridge->setPWMlg(Bridge::RED, 211);
+    bridge->setPWMlg(BankColorValues::BLUE, 0);
+    bridge->setPWMlg(BankColorValues::GREEN, 0);
+    bridge->setPWMlg(BankColorValues::WHITE, 0);
+    bridge->setPWMlg(BankColorValues::RED, 211);
     sleep(1);
-    bridge->setPWMlg(Bridge::RED, 0);
+    bridge->setPWMlg(BankColorValues::RED, 0);
     for(int i = 0; i < 4; ++i) {
         for(int j = 0; j < 4; ++j) {
             for(int k = 0; k < 2; ++k) {
@@ -204,21 +204,21 @@ void Handler::runTestMode() {
             bridge->setData(bcolor[j], i, 0, 0);
         }
     }
-    bridge->setPWMlg(Bridge::GREEN, 211);
+    bridge->setPWMlg(BankColorValues::GREEN, 211);
     sleep(1);
     bridge->setAllOff();
     sleep(1);
 }
 
 void Handler::reset(const std::string &data) {
-    Bridge::BankColorValues values;
+    BankColorValues values;
     if(data != "") {
         std::string::size_type pos = 0;
         std::string::size_type found = 0;
 
         int val;
 
-        for(int i = 0; i < Bridge::COLOR_COUNT ; ++i) {
+        for(int i = 0; i < BankColorValues::COLOR_COUNT ; ++i) {
             found = data.find(';', pos);
             val = atoi(data.substr(pos, found - pos).c_str());
             values.setColor(i, val);
@@ -226,10 +226,10 @@ void Handler::reset(const std::string &data) {
         }
         LOG(moba::DEBUG) <<
             "--> direct" <<
-            " white: " << values.getColor(0, Bridge::WHITE) <<
-            " green: " << values.getColor(0, Bridge::GREEN) <<
-            " red: " << values.getColor(0, Bridge::RED) <<
-            " blue: " << values.getColor(0, Bridge::BLUE) << std::endl;
+            " white: " << values.getColor(0, BankColorValues::WHITE) <<
+            " green: " << values.getColor(0, BankColorValues::GREEN) <<
+            " red: " << values.getColor(0, BankColorValues::RED) <<
+            " blue: " << values.getColor(0, BankColorValues::BLUE) << std::endl;
     }
     currentValues.setAll(values);
     bridge->setPWMlg(values);
@@ -243,7 +243,7 @@ void Handler::insertNext(const std::string &data) {
         return;
     }
 
-    Bridge::BankColorValues values;
+    BankColorValues values;
 
     std::string::size_type pos = 0;
     std::string::size_type found = 0;
@@ -254,10 +254,10 @@ void Handler::insertNext(const std::string &data) {
     for(int i = 0; i < 6; ++i) {
         found = data.find(';', pos);
         switch(i) {
-            case Bridge::WHITE:
-            case Bridge::GREEN:
-            case Bridge::RED:
-            case Bridge::BLUE:
+            case BankColorValues::WHITE:
+            case BankColorValues::GREEN:
+            case BankColorValues::RED:
+            case BankColorValues::BLUE:
                 val = atoi(data.substr(pos, found - pos).c_str());
                 for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
                     values.setColor(b, i, val);
@@ -276,10 +276,10 @@ void Handler::insertNext(const std::string &data) {
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         LOG(moba::DEBUG) <<
             "bank ["  << b << "] " <<
-            " white: " << values.getColor(b, Bridge::WHITE) <<
-            " green: " << values.getColor(b, Bridge::GREEN) <<
-            " red: " << values.getColor(b, Bridge::RED) <<
-            " blue: " << values.getColor(b, Bridge::BLUE) << std::endl;
+            " white: " << values.getColor(b, BankColorValues::WHITE) <<
+            " green: " << values.getColor(b, BankColorValues::GREEN) <<
+            " red: " << values.getColor(b, BankColorValues::RED) <<
+            " blue: " << values.getColor(b, BankColorValues::BLUE) << std::endl;
     }
     LOG(moba::DEBUG) << "duration: " << duration << std::endl;
 
@@ -291,7 +291,7 @@ void Handler::insertNext(const std::string &data) {
 
 void Handler::runEmergencyMode(const std::string &data) {
     int duration = EMERGENCY_DURATION;
-    int brigthness = EMERGENCY_BRIGTHNESS;
+    int brightness = EMERGENCY_BRIGHTNESS;
 
     if(data != "") {
         std::string::size_type pos = 0;
@@ -303,15 +303,15 @@ void Handler::runEmergencyMode(const std::string &data) {
         if(val > Bridge::MAX_VALUE) {
             val = Bridge::MAX_VALUE;
         }
-        brigthness = val;
+        brightness = val;
         if(found != std::string::npos) {
             duration = atoi(data.substr(found + 1).c_str());
         }
     }
     LOG(moba::DEBUG) <<
         "--> targets" <<
-        " white: " << brigthness << " duration: " << duration << std::endl;
-    //controller->emergencyStop(brigthness, duration);
+        " white: " << brightness << " duration: " << duration << std::endl;
+    //controller->emergencyStop(brightness, duration);
 }
 
 void Handler::releaseEmergencyStop() {

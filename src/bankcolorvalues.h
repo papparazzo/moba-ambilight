@@ -23,16 +23,17 @@
 #pragma once
 
 class BankColorValues {
-
-    enum BankColor {
-        WHITE       = 0,
-        GREEN       = 1,
-        RED         = 2,
-        BLUE        = 3
-        COLOR_COUNT = 4;
-    };
-
     public:
+        enum BankColor {
+            WHITE       = 0,
+            GREEN       = 1,
+            RED         = 2,
+            BLUE        = 3,
+            COLOR_COUNT = 4
+        };
+
+        static const int BANK_COUNT = 4;
+
         BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0);
         BankColorValues(const BankColorValues &orig);
 
@@ -44,6 +45,8 @@ class BankColorValues {
         int getColor(int bank, BankColor color);
         void increment(int bank, BankColor color);
         void decrement(int bank, BankColor color);
+
+        const char *getColorName(BankColorValues::BankColor c);
 
     protected:
         int value[BANK_COUNT][COLOR_COUNT];

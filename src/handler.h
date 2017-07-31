@@ -30,6 +30,7 @@
 
 #include "bridge.h"
 #include "processdata.h"
+#include "bankcolorvalues.h"
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
@@ -67,7 +68,7 @@ class Handler : private boost::noncopyable {
         static const int RANGE  = 4095;
         static const int TOTAL_STEPS_COUNT  = RANGE * 10;
 
-        static const int EMERGENCY_BRIGTHNESS = 2000;
+        static const int EMERGENCY_BRIGHTNESS = 2000;
         static const int EMERGENCY_DURATION   = 5;
 
         static const int DEFAULT_DURATION     = 0;
@@ -89,5 +90,5 @@ class Handler : private boost::noncopyable {
         int duration;
 
         moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
-        Bridge::BankColorValues currentValues;
+        BankColorValues currentValues;
 };

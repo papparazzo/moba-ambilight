@@ -209,48 +209,48 @@ void Bridge::setPWMFrequency(int freq) {
     wiringPiI2CWriteReg8(fd, Bridge::MODE1, oldmode | 0x80);
 }
 
-void Bridge::setOn(BankColor color) {
+void Bridge::setOn(BankColorValues::BankColor color) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 4096, 0);
     }
 }
 
-void Bridge::setOff(BankColor color) {
+void Bridge::setOff(BankColorValues::BankColor color) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 0, 0);
     }
 }
 
-void Bridge::setPWM(BankColor color, int on, int off) {
+void Bridge::setPWM(BankColorValues::BankColor color, int on, int off) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, on, off);
     }
 }
 
-void Bridge::setPWMlg(BankColor color, int val) {
+void Bridge::setPWMlg(BankColorValues::BankColor color, int val) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setPWMlg(color, i, val);
     }
 }
 
-void Bridge::setPWMlg(BankColor color, int bank, int val) {
+void Bridge::setPWMlg(BankColorValues::BankColor color, int bank, int val) {
     setData(color, bank, 0, table[val]);
 }
 
-void Bridge::setPWMlg(const Bridge::BankColorValues &values, int bank) {
-    setPWMlg(WHITE, bank, values.getColor(bank, WHITE));
-    setPWMlg(RED, bank, values.getColor(bank, RED));
-    setPWMlg(GREEN, bank, values.getColor(bank, GREEN));
-    setPWMlg(BLUE, bank, values.getColor(bank, BLUE));
+void Bridge::setPWMlg(const BankColorValues &values, int bank) {
+    setPWMlg(BankColorValues::WHITE, bank, values.getColor(bank, BankColorValues::WHITE));
+    setPWMlg(BankColorValues::RED, bank, values.getColor(bank, BankColorValues::RED));
+    setPWMlg(BankColorValues::GREEN, bank, values.getColor(bank, BankColorValues::GREEN));
+    setPWMlg(BankColorValues::BLUE, bank, values.getColor(bank, BankColorValues::BLUE));
 }
 
-void Bridge::setPWMlg(const Bridge::BankColorValues &values) {
+void Bridge::setPWMlg(const BankColorValues &values) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setPWMlg(values, i);
     }
 }
 
-void Bridge::setData(Bridge::BankColor color, int bank, int on, int off) {
+void Bridge::setData(BankColor color, int bank, int on, int off) {
     int channel = (bank * 4 + color) * 4;
 
     wiringPiI2CWriteReg8(fd, Bridge::LED0_ON_L + channel, on & 0xFF);
@@ -264,20 +264,4 @@ void Bridge::setAllOff() {
     wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_ON_H, 0);
     wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_OFF_L, 0);
     wiringPiI2CWriteReg8(fd, Bridge::ALL_LED_OFF_H, 0);
-}
-
-const char *Bridge::getColorName(BankColor c) {
-    switch(c) {
-        case RED:
-            return "red";
-
-        case BLUE:
-            return "blue";
-
-        case WHITE:
-            return "white";
-
-        case GREEN:
-            return "green";
-    }
 }

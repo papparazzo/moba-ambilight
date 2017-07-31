@@ -27,6 +27,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "bankcolorvalues.h"
 
 class BridgeException : public std::exception {
 
@@ -61,17 +62,15 @@ class Bridge : private boost::noncopyable {
         void softwareReset();
         void setPWMFrequency(int freq);
 
-        void setOn(BankColor color);
-        void setOff(BankColor color);
-        void setPWM(BankColor color, int on, int off);
-        void setPWMlg(BankColor color, int val);
-        void setPWMlg(BankColor color, int bank, int val);
+        void setOn(BankColorValues::BankColor color);
+        void setOff(BankColorValues::BankColor color);
+        void setPWM(BankColorValues::BankColor color, int on, int off);
+        void setPWMlg(BankColorValues::BankColor color, int val);
+        void setPWMlg(BankColorValues::BankColor color, int bank, int val);
         void setPWMlg(const BankColorValues &values, int bank);
         void setPWMlg(const BankColorValues &values);
-        void setData(BankColor color, int bank, int on, int off);
+        void setData(BankColorValues::BankColor color, int bank, int on, int off);
         void setAllOff();
-
-        const char *getColorName(BankColor c);
 
     protected:
         // Registers/etc.
