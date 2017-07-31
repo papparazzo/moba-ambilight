@@ -49,19 +49,11 @@ class BridgeException : public std::exception {
 };
 
 class Bridge : private boost::noncopyable {
-    public:
 
+    public:
         static const int MAX_VALUE = 4095;
         static const int MIN_VALUE = 0;
-        static const int COLOR_COUNT = 4; // white, green, red, blue...
         static const int BANK_COUNT = 4;
-
-        enum BankColor {
-            WHITE = 0,
-            GREEN = 1,
-            RED   = 2,
-            BLUE  = 3
-        };
 
         Bridge(int address = 0x40);
         ~Bridge();
