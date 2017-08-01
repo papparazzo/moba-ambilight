@@ -24,17 +24,15 @@
 
 #include "processdata.h"
 
-class ProcessDataWobble : ProcessData {
+class ProcessDataWobble : public ProcessData {
     public:
-        ProcessDataWobble(const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
+        ProcessDataWobble(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur = 0);
 
         bool next(bool setOutput);
 
     protected:
-        double d(int bank, double t);
-        double getPlasmaValue(BankColorValues::BankColor color, int bank, double t);
+        BankColorValues amplitude;
+
     private:
 
 };
-
-

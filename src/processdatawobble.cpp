@@ -26,13 +26,13 @@ namespace {
     const double PI = 3.1415926535897932384626433832795;
 }
 
-bool ProcessDataWobble::next(bool setOutput) {
-    counter = ++counter % 200000;
-    d(0, (double)counter * PI / 1000);  // right
-    d(1, (double)counter * PI / 1000);  // center
-    d(2, (double)counter * PI / 1000);  // left
+
+ProcessDataWobble::ProcessDataWobble(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur) :
+ProcessData(bridge, start, end, dur), amplitude(amp) {
+
 }
 
+/*
 void ProcessDataWobble::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {
         throw ProcessDataException("amplitude and offset to high!");
@@ -44,6 +44,14 @@ void ProcessDataWobble::setAmlitudeAndOffset(Bridge::BankColor color, int amplit
 
     range[color].amplitude =  amplitude;
     range[color].offset = offset;
+}
+ *
+ *
+ * bool ProcessDataWobble::next(bool setOutput) {
+    objCounter = ++objCounter % 200000;
+    d(0, (double)objCounter * PI / 1000);  // right
+    d(1, (double)objCounter * PI / 1000);  // center
+    d(2, (double)objCounter * PI / 1000);  // left
 }
 
 double ProcessDataWobble::d(int bank, double t) {
@@ -77,3 +85,6 @@ double ProcessDataWobble::getPlasmaValue(BankColorValues::BankColor color, int b
     return range[color].amplitude * v + range[color].offset;
 }
 
+
+ *
+*/

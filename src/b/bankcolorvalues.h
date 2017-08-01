@@ -42,7 +42,7 @@ class BankColorValues {
         void setColor(BankColor color, int val);
         void setColor(int bank, BankColor color, int val);
         void setAll(const BankColorValues &val);
-        int getColor(int bank, BankColor color);
+        unsigned int getColor(int bank, BankColor color);
         void increment(int bank, BankColor color);
         void decrement(int bank, BankColor color);
 

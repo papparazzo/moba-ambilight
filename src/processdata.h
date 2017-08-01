@@ -22,8 +22,11 @@
 
 #pragma once
 
-#include "bridge.h"
 #include <exception>
+#include <boost/shared_ptr.hpp>
+
+#include "bridge.h"
+#include "bankcolorvalues.h"
 
 class ProcessDataException : public std::exception {
 
@@ -48,23 +51,27 @@ class ProcessData {
         static const int RANGE = Bridge::MAX_VALUE;
         static const int TOTAL_STEPS_COUNT = RANGE * 10;
 
+        ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
+
         virtual ~ProcessData();
 
-        unsigned int getObjectId() const;
-
-        virtual BankColorValues getBankColors(int stepsAhead) = 0;
+        virtual BankColorValues getBankColors(int stepsAhead = 1) = 0;
         virtual bool next(bool setOutput) = 0;
 
-        unsigned int getDuration();
+        unsigned int getDuration() const;
+        unsigned int getObjectId() const;
 
     protected:
         BankColorValues stepWidth;
         BankColorValues current;
         BankColorValues target;
 
+        boost::shared_ptr<Bridge> bridge;
+
         unsigned int duration;
+        unsigned int counter;
 
     private:
-        unsigned int objNb;
-        static unsigned int counter;
+        unsigned int objNumber;
+        static unsigned int objCounter;
 };

@@ -22,29 +22,11 @@
 
 #include "processdata.h"
 
-unsigned int ProcessData::counter = 0;
+unsigned int ProcessData::objCounter = 0;
 
-ProcessData::~ProcessData() {
-
-}
-
-unsigned int ProcessData::getObjectId() const {
-    return objNb;
-}
-
-unsigned int ProcessData::getDuration() const {
-    return duration;
-}
-
-
-
-
-
-ProcessData::ProcessData(const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
-current(start), target(end), duration(dur)
-{
-    objNb = counter++;
-
+ProcessData::ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
+bridge(bridge), current(start), target(end), duration(dur) {
+    objNumber = objCounter++;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
             int delta = end.getColor(b, c) - start.getColor(b, c);
@@ -57,39 +39,15 @@ current(start), target(end), duration(dur)
     }
 }
 
+ProcessData::~ProcessData() {
 
-/**
+}
 
-    for(int b = 0; b < 3; ++b) {
-        for(int c = 0; c < 4; ++c) {
-            if(!stepWidth[c] || i % stepWidth[c]) {
-                return;
-            }
-            if(stepWidth[c] > 0 && current.targetIntensity[c] < Controller::RANGE) {
-                current.targetIntensity[c]++;
-            }
-            if(stepWidth[c] < 0 && current.targetIntensity[c] > 0) {
-                current.targetIntensity[c]--;
-            }
-            if(interrupted) {
-                bridge->setPWMlg(Controller::bcolor[c], b, current.targetIntensity[c]);
-            }
-        }
-    }
+unsigned int ProcessData::getObjectId() const {
+    return objNumber;
+}
 
- *
-
-
-
-
-
-
-        } else if(newValues.wobble) {
-            //current.wobble = true;
-            //setAmlitudeAndOffset((Bridge::BankColor)i, newValues.targetIntensity[i], current.targetIntensity[i]);
-
-            stepWidth[i] = Controller::STEPS / (newValues.targetIntensity[i] - current.targetIntensity[i]);
-        } else {
-            stepWidth[i] = 0;
- */
+unsigned int ProcessData::getDuration() const {
+    return duration;
+}
 
