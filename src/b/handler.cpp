@@ -62,7 +62,7 @@ void Handler::run() {
             if(!next->next(!interuptMode)) {
                 break;
             }
-            
+
 
         } while(true);
     } while(true);
@@ -70,7 +70,6 @@ void Handler::run() {
 
 void Handler::fetchNextMsg() {
     moba::IPC::Message msg;
-    bool halted = false;
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -79,9 +78,6 @@ void Handler::fetchNextMsg() {
 
         if(!ipc->receive(msg)) {
             if(emergency) {
-                return;
-            }
-            if(!halted) {
                 return;
             }
             usleep(50000);
@@ -121,24 +117,6 @@ void Handler::fetchNextMsg() {
             case moba::IPC::CMD_RUN: {
                 LOG(moba::DEBUG) << "run... " << std::endl;
                 insertNext(msg.mtext);
-                break;
-            }
-
-            case moba::IPC::CMD_HALT: {
-                LOG(moba::DEBUG) << "halt..." << std::endl;
-                if(halted) {
-                    LOG(moba::WARNING) << "already halted!" << std::endl;
-                }
-                halted = true;
-                break;
-            }
-
-            case moba::IPC::CMD_CONTINUE: {
-                LOG(moba::DEBUG) << "continue..." << std::endl;
-                if(!halted) {
-                    LOG(moba::WARNING) << "halted not set!" << std::endl;
-                }
-                halted = false;
                 break;
             }
 

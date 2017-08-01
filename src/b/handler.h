@@ -65,8 +65,8 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        static const int RANGE  = 4095;
-        static const int TOTAL_STEPS_COUNT  = RANGE * 10;
+        //static const int RANGE  = 4095;
+        //static const int TOTAL_STEPS_COUNT  = RANGE * 10;
 
         static const int EMERGENCY_BRIGHTNESS = 2000;
         static const int EMERGENCY_DURATION   = 5;
