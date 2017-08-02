@@ -32,6 +32,17 @@ ProcessData(bridge, start, end, dur), amplitude(amp) {
 
 }
 
+bool ProcessDataPlain::next(bool setOutput) {
+    if(!ProcessData::next(setOutput)) {
+        return false;
+    }
+
+    
+
+    return false;
+}
+
+
 /*
 void ProcessDataWobble::setAmlitudeAndOffset(Bridge::BankColor color, int amplitude, int offset) {
     if(amplitude * 2 + offset > Bridge::MAX_VALUE) {

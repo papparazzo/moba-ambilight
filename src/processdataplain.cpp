@@ -28,30 +28,9 @@ ProcessData(bridge, start, end, dur) {
 }
 
 bool ProcessDataPlain::next(bool setOutput) {
-    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        for(int c = 0; c < 4; ++c) {
-            unsigned int cc = stepWidth.getColor(b, c);
-            if(!cc || counter % cc) {
-                continue;
-            }
-            if(cc > 0 && current.getColor(b, c) < RANGE) {
-                current.increment(b, c);
-            }
-            if(cc < 0 && current.getColor(b, c) > 0) {
-                current.decrement(b, c);
-            }
-        }
-        if(setOutput) {
-            bridge->setPWMlg(current, b);
-        }
-    }
-
-
-    if(++counter == TOTAL_STEPS_COUNT) {
-        return true;
-    }
-    return false;
+    return ProcessData::next(setOutput);
 }
+
 
 /*
 BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
