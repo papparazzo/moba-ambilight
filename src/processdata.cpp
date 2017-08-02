@@ -75,9 +75,27 @@ bool ProcessDataPlain::next(bool setOutput) {
     return false;
 }
 
-/*
-BankColorValues ProcessData::getBankColors(int stepsAhead) {
-    //stepsAhead * stepWidth counter
-}
+bool ProcessData::getBankColors(BankColorValues &values, int stepsAhead) {
+    if(stepsAhead > TOTAL_STEPS_COUNT) {
+        return false;
+    }
 
-*/
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        for(int c = 0; c < 4; ++c) {
+            /*
+            unsigned int cc = stepWidth.getValue(b, c);
+            if(!cc || counter % cc) {
+                continue;
+            }
+
+                stepsAhead * cc + counter
+
+            }
+            if(cc < 0 && current.getValue(b, c) > 0) {
+                current.decrement(b, c);
+            }
+             */
+        }
+    }
+    return true;
+}
