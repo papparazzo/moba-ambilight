@@ -238,10 +238,10 @@ void Bridge::setPWMlg(BankColorValues::BankColor color, int bank, int val) {
 }
 
 void Bridge::setPWMlg(const BankColorValues &values, int bank) {
-    setPWMlg(BankColorValues::WHITE, bank, values.getColor(bank, BankColorValues::WHITE));
-    setPWMlg(BankColorValues::RED, bank, values.getColor(bank, BankColorValues::RED));
-    setPWMlg(BankColorValues::GREEN, bank, values.getColor(bank, BankColorValues::GREEN));
-    setPWMlg(BankColorValues::BLUE, bank, values.getColor(bank, BankColorValues::BLUE));
+    setPWMlg(BankColorValues::WHITE, bank, values.getValue(bank, BankColorValues::WHITE));
+    setPWMlg(BankColorValues::RED, bank, values.getValue(bank, BankColorValues::RED));
+    setPWMlg(BankColorValues::GREEN, bank, values.getValue(bank, BankColorValues::GREEN));
+    setPWMlg(BankColorValues::BLUE, bank, values.getValue(bank, BankColorValues::BLUE));
 }
 
 void Bridge::setPWMlg(const BankColorValues &values) {

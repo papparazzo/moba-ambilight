@@ -29,11 +29,11 @@ bridge(bridge), current(start), target(end), duration(dur) {
     objNumber = objCounter++;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
-            int delta = end.getColor(b, c) - start.getColor(b, c);
+            int delta = end.getValue(b, c) - start.getValue(b, c);
             if(delta) {
-                stepWidth.setColor(b, c, TOTAL_STEPS_COUNT / delta);
+                stepWidth.setValue(b, c, TOTAL_STEPS_COUNT / delta);
             } else {
-                stepWidth.setColor(b, c, 0);
+                stepWidth.setValue(b, c, 0);
             }
         }
     }
@@ -57,14 +57,14 @@ bool ProcessDataPlain::next(bool setOutput) {
     }
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < 4; ++c) {
-            unsigned int cc = stepWidth.getColor(b, c);
+            unsigned int cc = stepWidth.getValue(b, c);
             if(!cc || counter % cc) {
                 continue;
             }
-            if(cc > 0 && current.getColor(b, c) < RANGE) {
+            if(cc > 0 && current.getValue(b, c) < RANGE) {
                 current.increment(b, c);
             }
-            if(cc < 0 && current.getColor(b, c) > 0) {
+            if(cc < 0 && current.getValue(b, c) > 0) {
                 current.decrement(b, c);
             }
         }
@@ -74,3 +74,10 @@ bool ProcessDataPlain::next(bool setOutput) {
     }
     return false;
 }
+
+/*
+BankColorValues ProcessData::getBankColors(int stepsAhead) {
+    //stepsAhead * stepWidth counter
+}
+
+*/

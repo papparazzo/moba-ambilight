@@ -211,10 +211,10 @@ void Handler::reset(const std::string &data) {
         }
         LOG(moba::DEBUG) <<
             "--> direct" <<
-            " white: " << values.getColor(0, BankColorValues::WHITE) <<
-            " green: " << values.getColor(0, BankColorValues::GREEN) <<
-            " red: " << values.getColor(0, BankColorValues::RED) <<
-            " blue: " << values.getColor(0, BankColorValues::BLUE) << std::endl;
+            " white: " << values.getValue(0, BankColorValues::WHITE) <<
+            " green: " << values.getValue(0, BankColorValues::GREEN) <<
+            " red: " << values.getValue(0, BankColorValues::RED) <<
+            " blue: " << values.getValue(0, BankColorValues::BLUE) << std::endl;
     }
     currentValues.setAll(values);
     bridge->setPWMlg(values);
@@ -245,7 +245,7 @@ void Handler::insertNext(const std::string &data) {
             case BankColorValues::BLUE:
                 val = atoi(data.substr(pos, found - pos).c_str());
                 for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-                    values.setColor(b, i, val);
+                    values.setValue(b, i, val);
                 }
                 break;
 
@@ -261,10 +261,10 @@ void Handler::insertNext(const std::string &data) {
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         LOG(moba::DEBUG) <<
             "bank ["  << b << "] " <<
-            " white: " << values.getColor(b, BankColorValues::WHITE) <<
-            " green: " << values.getColor(b, BankColorValues::GREEN) <<
-            " red: " << values.getColor(b, BankColorValues::RED) <<
-            " blue: " << values.getColor(b, BankColorValues::BLUE) << std::endl;
+            " white: " << values.getValue(b, BankColorValues::WHITE) <<
+            " green: " << values.getValue(b, BankColorValues::GREEN) <<
+            " red: " << values.getValue(b, BankColorValues::RED) <<
+            " blue: " << values.getValue(b, BankColorValues::BLUE) << std::endl;
     }
     LOG(moba::DEBUG) << "duration: " << duration << std::endl;
 

@@ -20,7 +20,7 @@
  *
  */
 
-#include "BankColorValues.h"
+#include "bankcolorvalues.h"
 
 BankColorValues::BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
     for(int b = 0; b < BANK_COUNT; ++b) {
@@ -40,11 +40,11 @@ BankColorValues::~BankColorValues() {
 
 void BankColorValues::setColor(BankColor color, int val) {
     for(int b = 0; b < BANK_COUNT; ++b) {
-        setColor(b, color, val);
+        setValue(b, color, val);
     }
 }
 
-void BankColorValues::setColor(int bank, BankColor color, int val) {
+void BankColorValues::setValue(int bank, BankColor color, int val) {
     if(val < Bridge::MIN_VALUE) {
         val = Bridge::MIN_VALUE;
     }
@@ -62,7 +62,7 @@ void BankColorValues::setAll(const BankColorValues &val) {
     }
 }
 
-int BankColorValues::getColor(int bank, BankColor color) {
+int BankColorValues::getValue(int bank, BankColor color) {
     return value[bank][color];
 }
 

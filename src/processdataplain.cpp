@@ -30,26 +30,3 @@ ProcessData(bridge, start, end, dur) {
 bool ProcessDataPlain::next(bool setOutput) {
     return ProcessData::next(setOutput);
 }
-
-
-/*
-BankColorValues ProcessData::getBankColors(int stepsAhead, int bank) {
-    if(stepsAhead > TOTAL_STEPS_COUNT) {
-        throw ProcessDataException("out of range");
-    }
-
-    for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
-        if(!stepWidth.getColor(bank, c) || i % stepWidth.getColor(bank, c)) {
-            continue;
-        }
-        if(stepWidth.getColor(bank, c) > 0 && current.getColor(bank, c) < Controller::RANGE) {
-            current.increment(bank, c);
-        }
-        if(stepWidth.getColor(bank, c) < 0 && current.getColor(bank, c) > 0) {
-            current.decrement(bank, c);
-        }
-    }
-    //stepsAhead * stepWidth counter
-}
-
-*/
