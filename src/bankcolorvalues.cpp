@@ -21,8 +21,9 @@
  */
 
 #include "bankcolorvalues.h"
+#include "bridge.h"
 
-BankColorValues::BankColorValues(int white = 0, int green = 0, int red = 0, int blue = 0) {
+BankColorValues::BankColorValues(int white, int green, int red, int blue) {
     for(int b = 0; b < BANK_COUNT; ++b) {
         value[b][WHITE] = white;
         value[b][GREEN] = green;
@@ -38,13 +39,13 @@ BankColorValues::BankColorValues(const BankColorValues &orig) {
 BankColorValues::~BankColorValues() {
 }
 
-void BankColorValues::setValue(BankColor color, int val) {
+void BankColorValues::setValue(int color, int val) {
     for(int b = 0; b < BANK_COUNT; ++b) {
         setValue(b, color, val);
     }
 }
 
-void BankColorValues::setValue(int bank, BankColor color, int val) {
+void BankColorValues::setValue(int bank, int color, int val) {
     if(val < Bridge::MIN_VALUE) {
         val = Bridge::MIN_VALUE;
     }
@@ -62,14 +63,14 @@ void BankColorValues::setAll(const BankColorValues &val) {
     }
 }
 
-int BankColorValues::getValue(int bank, BankColor color) {
+int BankColorValues::getValue(int bank, int color) const {
     return value[bank][color];
 }
 
-void BankColorValues::increment(int bank, BankColor color) {
+void BankColorValues::increment(int bank, int color) {
     setValue(bank, color, value[bank][color]++);
 }
 
-void BankColorValues::decrement(int bank, BankColor color) {
+void BankColorValues::decrement(int bank, int color) {
     setValue(bank, color, value[bank][color]--);
 }

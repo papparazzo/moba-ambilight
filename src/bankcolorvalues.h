@@ -39,12 +39,12 @@ class BankColorValues {
 
         ~BankColorValues();
 
-        void setValue(BankColor color, int val);
-        void setValue(int bank, BankColor color, int val);
+        void setValue(int color, int val);
+        void setValue(int bank, int color, int val);
         void setAll(const BankColorValues &val);
-        unsigned int getValue(int bank, BankColor color);
-        void increment(int bank, BankColor color);
-        void decrement(int bank, BankColor color);
+        int getValue(int bank, int color) const;
+        void increment(int bank, int color);
+        void decrement(int bank, int color);
 
     protected:
         int value[BANK_COUNT][COLOR_COUNT];

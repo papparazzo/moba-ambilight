@@ -22,7 +22,7 @@
 
 #include "processdataplain.h"
 
-ProcessDataPlain::ProcessDataPlain(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0) :
+ProcessDataPlain::ProcessDataPlain(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
 ProcessData(bridge, start, end, dur) {
 
 }

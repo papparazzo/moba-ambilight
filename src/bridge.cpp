@@ -250,7 +250,7 @@ void Bridge::setPWMlg(const BankColorValues &values) {
     }
 }
 
-void Bridge::setData(BankColor color, int bank, int on, int off) {
+void Bridge::setData(BankColorValues::BankColor color, int bank, int on, int off) {
     int channel = (bank * 4 + color) * 4;
 
     wiringPiI2CWriteReg8(fd, Bridge::LED0_ON_L + channel, on & 0xFF);

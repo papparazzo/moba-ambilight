@@ -51,7 +51,7 @@ unsigned int ProcessData::getDuration() const {
     return duration;
 }
 
-bool ProcessDataPlain::next(bool setOutput) {
+bool ProcessData::next(bool setOutput) {
     if(++counter == TOTAL_STEPS_COUNT) {
         return true;
     }
