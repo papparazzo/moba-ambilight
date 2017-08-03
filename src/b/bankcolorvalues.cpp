@@ -38,7 +38,7 @@ BankColorValues::BankColorValues(const BankColorValues &orig) {
 BankColorValues::~BankColorValues() {
 }
 
-void BankColorValues::setColor(BankColor color, int val) {
+void BankColorValues::setValue(BankColor color, int val) {
     for(int b = 0; b < BANK_COUNT; ++b) {
         setValue(b, color, val);
     }
@@ -67,9 +67,9 @@ int BankColorValues::getValue(int bank, BankColor color) {
 }
 
 void BankColorValues::increment(int bank, BankColor color) {
-    setColor(bank, color, value[bank][color]++);
+    setValue(bank, color, value[bank][color]++);
 }
 
 void BankColorValues::decrement(int bank, BankColor color) {
-    setColor(bank, color, value[bank][color]--);
+    setValue(bank, color, value[bank][color]--);
 }

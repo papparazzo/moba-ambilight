@@ -39,7 +39,7 @@ class BankColorValues {
 
         ~BankColorValues();
 
-        void setColor(BankColor color, int val);
+        void setValue(BankColor color, int val);
         void setValue(int bank, BankColor color, int val);
         void setAll(const BankColorValues &val);
         unsigned int getValue(int bank, BankColor color);

@@ -206,7 +206,7 @@ void Handler::reset(const std::string &data) {
         for(int i = 0; i < BankColorValues::COLOR_COUNT ; ++i) {
             found = data.find(';', pos);
             val = atoi(data.substr(pos, found - pos).c_str());
-            values.setColor(i, val);
+            values.setValue(i, val);
             pos = found + 1;
         }
         LOG(moba::DEBUG) <<
