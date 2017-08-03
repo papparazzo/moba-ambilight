@@ -85,8 +85,11 @@ unsigned int ProcessDataWobble::getBankColors(BankColorValues &values, unsigned 
     if(ProcessData::getBankColors(values, stepsAhead) == 0) {
         return 0;
     }
-
-
-
+    int i = (counter + stepsAhead - TOTAL_STEPS_COUNT) % 200000;
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        for(int c = 0; c < 4; ++c) {
+            values.setValue(b, c, getWobbleValue(b, c, i));
+        }
+    }
     return 0;
 }

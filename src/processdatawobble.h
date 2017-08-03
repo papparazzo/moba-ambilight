@@ -35,5 +35,5 @@ class ProcessDataWobble : public ProcessData {
         BankColorValues amplitude;
 
     private:
-        double getWobbleValue(int c, double v);
+        double getWobbleValue(int b, int c, unsigned int i);
 };
