@@ -49,31 +49,44 @@ bool ProcessDataWobble::next(bool setOutput) {
     }
     counter = ++counter % 200000;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        double v = std::sin((double)counter * PI / 1000 + 10.0 * b);
-
         for(int c = 0; c < 4; ++c) {
-            switch(c) {
-                case BankColorValues::BLUE:
-                    v = 1 + std::sin(v * PI + 4 * PI / 3);
-                    break;
-
-                case BankColorValues::RED:
-                    v = 1 + std::sin(v * PI);
-                    break;
-
-                case BankColorValues::GREEN:
-                    v = 1 + std::sin(v * PI + 2 * PI / 3);
-                    break;
-
-                case BankColorValues::WHITE:
-                    v = 1 + std::sin(v * PI + 8 * PI / 3);
-                    break;
-            }
-            current.setValue(b, c, amplitude.getValue(b, c) * v + target.getValue(b, c));
+            current.setValue(b, c, getWobbleValue(b, c, counter));
         }
         if(setOutput) {
             bridge->setPWMlg(current, b);
         }
     }
     return false;
+}
+
+double ProcessDataWobble::getWobbleValue(int b, int c, unsigned int i) {
+    double v = std::sin((double)i * PI / 1000 + 10.0 * b);
+    switch(c) {
+        case BankColorValues::BLUE:
+            v = 1 + std::sin(v * PI + 4 * PI / 3);
+            break;
+
+        case BankColorValues::RED:
+            v = 1 + std::sin(v * PI);
+            break;
+
+        case BankColorValues::GREEN:
+            v = 1 + std::sin(v * PI + 2 * PI / 3);
+            break;
+
+        case BankColorValues::WHITE:
+            v = 1 + std::sin(v * PI + 8 * PI / 3);
+            break;
+    }
+    return amplitude.getValue(b, c) * v + target.getValue(b, c);
+}
+
+unsigned int ProcessDataWobble::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
+    if(ProcessData::getBankColors(values, stepsAhead) == 0) {
+        return 0;
+    }
+
+
+
+    return 0;
 }

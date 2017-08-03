@@ -28,6 +28,7 @@ class ProcessDataHold : public ProcessData {
     public:
         ProcessDataHold(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
+        virtual unsigned int getBankColors(BankColorValues &values, unsigned int stepsAhead = 1);
         bool next(bool setOutput);
 
     private:

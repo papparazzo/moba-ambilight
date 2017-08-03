@@ -31,3 +31,10 @@ bool ProcessDataHold::next(bool setOutput) {
     ProcessData::next(setOutput);
     return false;
 }
+
+unsigned int ProcessDataHold::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
+    if(ProcessData::getBankColors(values, stepsAhead) != 0) {
+        values = target;
+    }
+    return 0;
+}
