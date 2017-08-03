@@ -22,6 +22,11 @@
 
 #include "handler.h"
 
+#include "processdata.h"
+#include "processdatahold.h"
+#include "processdataplain.h"
+#include "processdatawobble.h"
+
 #include <moba/log.h>
 #include <moba/ringbuffer.h>
 
@@ -150,7 +155,7 @@ void Handler::fetchNextMsg() {
                 LOG(moba::DEBUG) <<
                     "--> duration: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
-                duration = static_cast<int>((duration * 1000 * 1000) / Handler::TOTAL_STEPS_COUNT);
+                duration = static_cast<int>((duration * 1000 * 1000) / ProcessData::TOTAL_STEPS_COUNT);
                 break;
             }
 
@@ -268,7 +273,7 @@ void Handler::insertNext(const std::string &data) {
     }
     LOG(moba::DEBUG) << "duration: " << duration << std::endl;
 
-    boost::shared_ptr<ProcessData> item(new ProcessData(currentValues, values, durationOverride));
+    boost::shared_ptr<ProcessData> item(new ProcessData(bridge, currentValues, values, durationOverride));
 
     currentValues.setAll(values);
     regularBuffer.push(item);

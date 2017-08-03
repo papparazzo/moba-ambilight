@@ -34,6 +34,7 @@
 
 #include <moba/ipc.h>
 #include <moba/signalhandler.h>
+#include <moba/ringbuffer.h>
 
 class HandlerException : public std::exception {
 
