@@ -123,7 +123,7 @@ void Handler::fetchNextMsg() {
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
                 reset(msg.mtext);
-                halted = false;
+                //halted = false;
                 break;
             }
 
@@ -134,13 +134,13 @@ void Handler::fetchNextMsg() {
 
             case moba::IPC::CMD_INTERRUPT: {
                 LOG(moba::DEBUG) << "interrupt... " << std::endl;
-                controller->setNewTarget(parseMessageData(msg.mtext), true);
+               // controller->setNewTarget(parseMessageData(msg.mtext), true);
                 break;
             }
 
             case moba::IPC::CMD_RESUME: {
                 LOG(moba::DEBUG) << "resume... " << std::endl;
-                controller->resume();
+                //controller->resume();
                 break;
             }
 
@@ -158,9 +158,9 @@ void Handler::fetchNextMsg() {
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
         }
-        if(!halted || emergency) {
+        //if(!halted || emergency) {
             return;
-        }
+        //}
     }
 }
 
@@ -296,7 +296,7 @@ void Handler::runEmergencyMode(const std::string &data) {
     LOG(moba::DEBUG) <<
         "--> targets" <<
         " white: " << brightness << " duration: " << duration << std::endl;
-    controller->emergencyStop(brightness, duration);
+    //controller->emergencyStop(brightness, duration);
 }
 
 void Handler::releaseEmergencyStop() {
