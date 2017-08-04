@@ -209,31 +209,31 @@ void Bridge::setPWMFrequency(int freq) {
     wiringPiI2CWriteReg8(fd, Bridge::MODE1, oldmode | 0x80);
 }
 
-void Bridge::setOn(BankColorValues::BankColor color) {
+void Bridge::setOn(int color) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 4096, 0);
     }
 }
 
-void Bridge::setOff(BankColorValues::BankColor color) {
+void Bridge::setOff(int color) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, 0, 0);
     }
 }
 
-void Bridge::setPWM(BankColorValues::BankColor color, int on, int off) {
+void Bridge::setPWM(int color, int on, int off) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setData(color, i, on, off);
     }
 }
 
-void Bridge::setPWMlg(BankColorValues::BankColor color, int val) {
+void Bridge::setPWMlg(int color, int val) {
     for(int i = 0; i < BANK_COUNT; ++i) {
         setPWMlg(color, i, val);
     }
 }
 
-void Bridge::setPWMlg(BankColorValues::BankColor color, int bank, int val) {
+void Bridge::setPWMlg(int color, int bank, int val) {
     setData(color, bank, 0, table[val]);
 }
 
@@ -250,7 +250,7 @@ void Bridge::setPWMlg(const BankColorValues &values) {
     }
 }
 
-void Bridge::setData(BankColorValues::BankColor color, int bank, int on, int off) {
+void Bridge::setData(int color, int bank, int on, int off) {
     int channel = (bank * 4 + color) * 4;
 
     wiringPiI2CWriteReg8(fd, Bridge::LED0_ON_L + channel, on & 0xFF);

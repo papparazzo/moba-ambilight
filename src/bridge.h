@@ -62,14 +62,14 @@ class Bridge : private boost::noncopyable {
         void softwareReset();
         void setPWMFrequency(int freq);
 
-        void setOn(BankColorValues::BankColor color);
-        void setOff(BankColorValues::BankColor color);
-        void setPWM(BankColorValues::BankColor color, int on, int off);
-        void setPWMlg(BankColorValues::BankColor color, int val);
-        void setPWMlg(BankColorValues::BankColor color, int bank, int val);
+        void setOn(int color);
+        void setOff(int color);
+        void setPWM(int color, int on, int off);
+        void setPWMlg(int color, int val);
+        void setPWMlg(int color, int bank, int val);
         void setPWMlg(const BankColorValues &values, int bank);
         void setPWMlg(const BankColorValues &values);
-        void setData(BankColorValues::BankColor color, int bank, int on, int off);
+        void setData(int color, int bank, int on, int off);
         void setAllOff();
 
     protected:
