@@ -67,9 +67,9 @@ bool ProcessData::hasNext(bool setOutput) {
             if(cc < 0 && current.getValue(b, c) > 0) {
                 current.decrement(b, c);
             }
-        }
-        if(setOutput) {
-            bridge->setPWMlg(current, b);
+            if(setOutput) {
+                bridge->setPWMlg(c, b, current.getValue(b, c));
+            }
         }
     }
     return true;
