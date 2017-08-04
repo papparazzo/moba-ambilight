@@ -135,12 +135,6 @@ bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
                 return true;
         }
     }
-    if(args.action == moba::IPC::CMD_RUN && args.data == "") {
-        throw ParseCmdLineException("no data given!");
-    }
-    if(args.action != moba::IPC::CMD_RUN && args.data != "") {
-        throw ParseCmdLineException("invalid action given!");
-    }
     return false;
 }
 
@@ -152,10 +146,11 @@ int main(int argc, char** argv) {
     };
 
     try {
-        if(!parseArguments(argc, argv, args)) {
+        if(parseArguments(argc, argv, args)) {
             return EXIT_SUCCESS;
         }
         moba::IPC ipc(args.key, moba::IPC::TYPE_CLIENT);
+        std::cout << "sending <" <<  moba::IPC::getCMDAsString(args.action) << "> with <" << args.data << "> to " << args.key << std::endl;
         ipc.send(args.data, args.action);
     } catch(std::exception &e) {
         LOG(moba::WARNING) << e.what() << std::endl;

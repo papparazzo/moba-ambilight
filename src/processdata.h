@@ -56,7 +56,7 @@ class ProcessData {
         virtual ~ProcessData();
 
         virtual unsigned int getBankColors(BankColorValues &values, unsigned int stepsAhead = 1);
-        virtual bool next(bool setOutput);
+        virtual bool hasNext(bool setOutput);
 
         unsigned int getDuration() const;
         unsigned int getObjectId() const;

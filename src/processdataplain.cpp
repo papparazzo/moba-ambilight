@@ -27,6 +27,6 @@ ProcessData(bridge, start, end, dur) {
 
 }
 
-bool ProcessDataPlain::next(bool setOutput) {
-    return ProcessData::next(setOutput);
+bool ProcessDataPlain::hasNext(bool setOutput) {
+    return ProcessData::hasNext(setOutput);
 }

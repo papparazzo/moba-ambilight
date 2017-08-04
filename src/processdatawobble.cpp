@@ -43,9 +43,9 @@ ProcessData(bridge, start, end, dur), amplitude(amp) {
     }
 }
 
-bool ProcessDataWobble::next(bool setOutput) {
-    if(!ProcessData::next(setOutput)) {
-        return false;
+bool ProcessDataWobble::hasNext(bool setOutput) {
+    if(ProcessData::hasNext(setOutput)) {
+        return true;
     }
     counter = ++counter % 200000;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
@@ -56,7 +56,7 @@ bool ProcessDataWobble::next(bool setOutput) {
             bridge->setPWMlg(current, b);
         }
     }
-    return false;
+    return true;
 }
 
 double ProcessDataWobble::getWobbleValue(int b, int c, unsigned int i) {

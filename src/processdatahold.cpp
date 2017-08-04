@@ -27,9 +27,9 @@ ProcessData(bridge, start, end, dur) {
 
 }
 
-bool ProcessDataHold::next(bool setOutput) {
-    ProcessData::next(setOutput);
-    return false;
+bool ProcessDataHold::hasNext(bool setOutput) {
+    ProcessData::hasNext(setOutput);
+    return true;
 }
 
 unsigned int ProcessDataHold::getBankColors(BankColorValues &values, unsigned int stepsAhead) {

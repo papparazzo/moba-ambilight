@@ -64,7 +64,7 @@ void Handler::run() {
                 continue;
             }
 
-            if(!next->next(!interuptMode)) {
+            if(!next->hasNext(!interuptMode)) {
                 break;
             }
 
@@ -82,7 +82,7 @@ void Handler::fetchNextMsg() {
         }
 
         if(!ipc->receive(msg)) {
-            if(emergency) {
+            if(!emergency) {
                 return;
             }
             usleep(50000);
@@ -128,7 +128,6 @@ void Handler::fetchNextMsg() {
             case moba::IPC::CMD_RESET: {
                 LOG(moba::DEBUG) << "reset... " << std::endl;
                 reset(msg.mtext);
-                //halted = false;
                 break;
             }
 
@@ -163,9 +162,9 @@ void Handler::fetchNextMsg() {
                 LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
         }
-        //if(!halted || emergency) {
+        if(emergency) {
             return;
-        //}
+        }
     }
 }
 
@@ -183,15 +182,16 @@ void Handler::runTestMode() {
     bridge->setPWMlg(BankColorValues::RED, 211);
     sleep(1);
     bridge->setPWMlg(BankColorValues::RED, 0);
-    for(int i = 0; i < 4; ++i) {
+    for(int b = 0; b < 4; ++b) {
+        LOG(moba::DEBUG) << "testing bank <" << b << ">" << std::endl;
         for(int j = 0; j < 4; ++j) {
             for(int k = 0; k < 2; ++k) {
-                bridge->setData(bcolor[j], i, 0, 150);
+                bridge->setData(bcolor[j], b, 0, 150);
                 delay(500);
-                bridge->setData(bcolor[j], i, 0, 600);
+                bridge->setData(bcolor[j], b, 0, 600);
                 delay(500);
             }
-            bridge->setData(bcolor[j], i, 0, 0);
+            bridge->setData(bcolor[j], b, 0, 0);
         }
     }
     bridge->setPWMlg(BankColorValues::GREEN, 211);

@@ -28,7 +28,7 @@ class ProcessDataPlain : public ProcessData {
     public:
         ProcessDataPlain(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
-        bool next(bool setOutput);
+        bool hasNext(bool setOutput);
 
     private:
 };

@@ -51,9 +51,9 @@ unsigned int ProcessData::getDuration() const {
     return duration;
 }
 
-bool ProcessData::next(bool setOutput) {
+bool ProcessData::hasNext(bool setOutput) {
     if(++counter == TOTAL_STEPS_COUNT) {
-        return true;
+        return false;
     }
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < 4; ++c) {
@@ -72,7 +72,7 @@ bool ProcessData::next(bool setOutput) {
             bridge->setPWMlg(current, b);
         }
     }
-    return false;
+    return true;
 }
 
 unsigned int ProcessData::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
