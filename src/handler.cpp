@@ -55,7 +55,7 @@ void Handler::run() {
 
         int i = 0;
         do {
-            if(i % 1000) {
+            if(++i % 1000) {
                 fetchNextMsg();
             }
             delayMicroseconds(duration + next->getDuration());
@@ -67,8 +67,6 @@ void Handler::run() {
             if(!next->hasNext(!interuptMode)) {
                 break;
             }
-
-
         } while(true);
     } while(true);
 }

@@ -68,9 +68,9 @@ int BankColorValues::getValue(int bank, int color) const {
 }
 
 void BankColorValues::increment(int bank, int color) {
-    setValue(bank, color, value[bank][color]++);
+    setValue(bank, color, ++value[bank][color]);
 }
 
 void BankColorValues::decrement(int bank, int color) {
-    setValue(bank, color, value[bank][color]--);
+    setValue(bank, color, --value[bank][color]);
 }
