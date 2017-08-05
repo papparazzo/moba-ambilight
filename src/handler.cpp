@@ -232,7 +232,7 @@ void Handler::insertNext(const std::string &data) {
     int durationOverride = duration;
     int val;
 
-    for(int i = 0; i < 6; ++i) {
+    for(int i = 0; i < 5; ++i) {
         found = data.find(';', pos);
         switch(i) {
             case BankColorValues::WHITE:
@@ -246,12 +246,14 @@ void Handler::insertNext(const std::string &data) {
                 break;
 
             case 4:
-                durationOverride = atoi(data.substr(pos, found - pos).c_str());
+                if(found != std::string::npos) { // FIXME: 
+                    durationOverride = atoi(data.substr(pos, found - pos).c_str());
+                }
                 break;
         }
         pos = found + 1;
     }
-    boost::shared_ptr<ProcessData> item(new ProcessData(bridge, currentValues, values, durationOverride));
+    boost::shared_ptr<ProcessData> item(new ProcessDataPlain(bridge, currentValues, values, durationOverride));
 
     currentValues.setAll(values);
     regularBuffer.push(item);
