@@ -21,11 +21,12 @@
  */
 
 #include "processdata.h"
+#include <moba/log.h>
 
 unsigned int ProcessData::objCounter = 0;
 
 ProcessData::ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
-bridge(bridge), current(start), target(end), duration(dur) {
+bridge(bridge), current(start), target(end) {
     objNumber = objCounter++;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
@@ -37,6 +38,17 @@ bridge(bridge), current(start), target(end), duration(dur) {
             }
         }
     }
+
+    LOG(moba::DEBUG) << "--> item #" << objNumber << std::endl;
+    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
+        LOG(moba::DEBUG) <<
+            "target of bank ["  << b << "] " <<
+            " white: " << target.getValue(b, BankColorValues::WHITE) <<
+            " green: " << target.getValue(b, BankColorValues::GREEN) <<
+            " red: " << target.getValue(b, BankColorValues::RED) <<
+            " blue: " << target.getValue(b, BankColorValues::BLUE) << std::endl;
+    }
+    setInterruptionTime(dur);
 }
 
 ProcessData::~ProcessData() {
@@ -47,8 +59,8 @@ unsigned int ProcessData::getObjectId() const {
     return objNumber;
 }
 
-unsigned int ProcessData::getDuration() const {
-    return duration;
+unsigned int ProcessData::getInterruptionTime() const {
+    return interruptionTime;
 }
 
 bool ProcessData::hasNext(bool setOutput) {
@@ -75,7 +87,7 @@ bool ProcessData::hasNext(bool setOutput) {
     return true;
 }
 
-unsigned int ProcessData::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
+unsigned int ProcessData::getBankColors(BankColorValues &values, unsigned int stepsAhead) const {
     if(counter + stepsAhead > TOTAL_STEPS_COUNT) {
         return counter + stepsAhead - TOTAL_STEPS_COUNT;
     }
@@ -88,4 +100,13 @@ unsigned int ProcessData::getBankColors(BankColorValues &values, unsigned int st
         }
     }
     return 0;
+}
+
+void ProcessData::setInterruptionTime(unsigned int duration) {
+    LOG(moba::DEBUG) <<
+        "duration total: ~" << duration <<
+        " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
+
+    interruptionTime = static_cast<int>((duration * 1000 * 1000) / ProcessData::TOTAL_STEPS_COUNT);
+    LOG(moba::DEBUG) << "interruption: ~" << interruptionTime << " µs." << std::endl;
 }

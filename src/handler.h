@@ -66,13 +66,10 @@ class Handler : private boost::noncopyable {
         void run();
 
     protected:
-        //static const int RANGE  = 4095;
-        //static const int TOTAL_STEPS_COUNT  = RANGE * 10;
-
         static const int EMERGENCY_BRIGHTNESS = 2000;
         static const int EMERGENCY_DURATION   = 5;
 
-        static const int DEFAULT_DURATION     = 0;
+        static const int DEFAULT_DURATION     = 10;
 
         boost::shared_ptr<Bridge> bridge;
         boost::shared_ptr<moba::IPC> ipc;

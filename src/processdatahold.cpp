@@ -21,10 +21,11 @@
  */
 
 #include "processdatahold.h"
+#include <moba/log.h>
 
 ProcessDataHold::ProcessDataHold(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0) :
 ProcessData(bridge, start, end, dur) {
-
+    LOG(moba::DEBUG) << "type: [hold] " << std::endl;
 }
 
 bool ProcessDataHold::hasNext(bool setOutput) {
@@ -32,7 +33,7 @@ bool ProcessDataHold::hasNext(bool setOutput) {
     return true;
 }
 
-unsigned int ProcessDataHold::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
+unsigned int ProcessDataHold::getBankColors(BankColorValues &values, unsigned int stepsAhead) const {
     if(ProcessData::getBankColors(values, stepsAhead) != 0) {
         values = target;
     }

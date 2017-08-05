@@ -52,14 +52,13 @@ void Handler::run() {
         }
 
         boost::shared_ptr<ProcessData> next = regularBuffer.pop();
-
+        int interruption = next->getInterruptionTime();
         int i = 0;
         do {
             if(++i % 1000) {
                 fetchNextMsg();
             }
-            delayMicroseconds(duration + next->getDuration());
-
+            delayMicroseconds(interruption);
             if(emergency) {
                 continue;
             }
@@ -89,7 +88,7 @@ void Handler::fetchNextMsg() {
 
         switch(msg.mtype) {
             case moba::IPC::CMD_EMERGENCY_STOP: {
-                LOG(moba::DEBUG) << "emergency..." << std::endl;
+                LOG(moba::DEBUG) << "CMD_EMERGENCY_STOP..." << std::endl;
                 if(emergency) {
                     LOG(moba::WARNING) << "emergency already set!" << std::endl;
                     break;
@@ -100,7 +99,7 @@ void Handler::fetchNextMsg() {
             }
 
             case moba::IPC::CMD_EMERGENCY_RELEASE: {
-                LOG(moba::DEBUG) << "emergency... off" << std::endl;
+                LOG(moba::DEBUG) << "CMD_EMERGENCY_RELEASE..." << std::endl;
                 if(!emergency) {
                     LOG(moba::WARNING) << "emergency not set!" << std::endl;
                     break;
@@ -111,48 +110,47 @@ void Handler::fetchNextMsg() {
             }
 
             case moba::IPC::CMD_TEST: {
-                LOG(moba::DEBUG) << "testing... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_TEST..." << std::endl;
                 runTestMode();
-                LOG(moba::DEBUG) << "testing... finished!" << std::endl;
+                LOG(moba::DEBUG) << "testing finished!" << std::endl;
                 return;
             }
 
             case moba::IPC::CMD_RUN: {
-                LOG(moba::DEBUG) << "run... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_RUN..." << std::endl;
                 insertNext(msg.mtext);
                 break;
             }
 
             case moba::IPC::CMD_RESET: {
-                LOG(moba::DEBUG) << "reset... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_RESET..." << std::endl;
                 reset(msg.mtext);
                 break;
             }
 
             case moba::IPC::CMD_TERMINATE: {
-                LOG(moba::DEBUG) << "terminate... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_TERMINATE..." << std::endl;
                 throw HandlerException("terminate received");
             }
 
             case moba::IPC::CMD_INTERRUPT: {
-                LOG(moba::DEBUG) << "interrupt... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_INTERRUPT..." << std::endl;
                // controller->setNewTarget(parseMessageData(msg.mtext), true);
                 break;
             }
 
             case moba::IPC::CMD_RESUME: {
-                LOG(moba::DEBUG) << "resume... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_RESUME..." << std::endl;
                 //controller->resume();
                 break;
             }
 
             case moba::IPC::CMD_SET_DURATION: {
-                LOG(moba::DEBUG) << "set duration... " << std::endl;
+                LOG(moba::DEBUG) << "CMD_SET_DURATION... " << std::endl;
                 duration = atoi(msg.mtext);
                 LOG(moba::DEBUG) <<
-                    "--> duration: ~" << duration <<
+                    "duration total: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
-                duration = static_cast<int>((duration * 1000 * 1000) / ProcessData::TOTAL_STEPS_COUNT);
                 break;
             }
 
@@ -212,12 +210,6 @@ void Handler::reset(const std::string &data) {
             values.setValue(i, val);
             pos = found + 1;
         }
-        LOG(moba::DEBUG) <<
-            "--> direct" <<
-            " white: " << values.getValue(0, BankColorValues::WHITE) <<
-            " green: " << values.getValue(0, BankColorValues::GREEN) <<
-            " red: " << values.getValue(0, BankColorValues::RED) <<
-            " blue: " << values.getValue(0, BankColorValues::BLUE) << std::endl;
     }
     currentValues.setAll(values);
     bridge->setPWMlg(values);
@@ -226,6 +218,7 @@ void Handler::reset(const std::string &data) {
 }
 
 void Handler::insertNext(const std::string &data) {
+    LOG(moba::DEBUG) << "data: <" << data << ">" << std::endl;
     if(data == "") {
         LOG(moba::WARNING) << "no values given!" << std::endl;
         return;
@@ -252,25 +245,12 @@ void Handler::insertNext(const std::string &data) {
                 }
                 break;
 
-            case 5:
+            case 4:
                 durationOverride = atoi(data.substr(pos, found - pos).c_str());
                 break;
         }
         pos = found + 1;
     }
-
-    LOG(moba::DEBUG) << "--> targets " << std::endl;
-
-    for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        LOG(moba::DEBUG) <<
-            "bank ["  << b << "] " <<
-            " white: " << values.getValue(b, BankColorValues::WHITE) <<
-            " green: " << values.getValue(b, BankColorValues::GREEN) <<
-            " red: " << values.getValue(b, BankColorValues::RED) <<
-            " blue: " << values.getValue(b, BankColorValues::BLUE) << std::endl;
-    }
-    LOG(moba::DEBUG) << "duration: " << duration << std::endl;
-
     boost::shared_ptr<ProcessData> item(new ProcessData(bridge, currentValues, values, durationOverride));
 
     currentValues.setAll(values);
@@ -296,9 +276,6 @@ void Handler::runEmergencyMode(const std::string &data) {
             duration = atoi(data.substr(found + 1).c_str());
         }
     }
-    LOG(moba::DEBUG) <<
-        "--> targets" <<
-        " white: " << brightness << " duration: " << duration << std::endl;
     //controller->emergencyStop(brightness, duration);
 }
 

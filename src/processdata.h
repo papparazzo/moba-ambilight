@@ -55,10 +55,10 @@ class ProcessData {
 
         virtual ~ProcessData();
 
-        virtual unsigned int getBankColors(BankColorValues &values, unsigned int stepsAhead = 1);
+        virtual unsigned int getBankColors(BankColorValues &values, unsigned int stepsAhead = 1) const;
         virtual bool hasNext(bool setOutput);
 
-        unsigned int getDuration() const;
+        unsigned int getInterruptionTime() const;
         unsigned int getObjectId() const;
 
     protected:
@@ -68,8 +68,11 @@ class ProcessData {
 
         boost::shared_ptr<Bridge> bridge;
 
-        unsigned int duration;
         unsigned int counter;
+
+        unsigned int interruptionTime;
+
+        void setInterruptionTime(unsigned int duration);
 
     private:
         unsigned int objNumber;

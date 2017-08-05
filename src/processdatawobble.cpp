@@ -23,6 +23,7 @@
 #include "processdatawobble.h"
 
 #include <cmath>
+#include <moba/log.h>
 
 namespace {
     const double PI = 3.1415926535897932384626433832795;
@@ -40,7 +41,14 @@ ProcessData(bridge, start, end, dur), amplitude(amp) {
                 throw ProcessDataException("amplitude and offset to low!");
             }
         }
+        LOG(moba::DEBUG) <<
+            "amplitude of bank ["  << b << "] " <<
+            " white: " << target.getValue(b, BankColorValues::WHITE) <<
+            " green: " << target.getValue(b, BankColorValues::GREEN) <<
+            " red: " << target.getValue(b, BankColorValues::RED) <<
+            " blue: " << target.getValue(b, BankColorValues::BLUE) << std::endl;
     }
+    LOG(moba::DEBUG) << "type: [wobble] " << std::endl;
 }
 
 bool ProcessDataWobble::hasNext(bool setOutput) {
@@ -59,7 +67,7 @@ bool ProcessDataWobble::hasNext(bool setOutput) {
     return true;
 }
 
-double ProcessDataWobble::getWobbleValue(int b, int c, unsigned int i) {
+double ProcessDataWobble::getWobbleValue(int b, int c, unsigned int i) const {
     double v = std::sin((double)i * PI / 1000 + 10.0 * b);
     switch(c) {
         case BankColorValues::BLUE:
@@ -81,7 +89,7 @@ double ProcessDataWobble::getWobbleValue(int b, int c, unsigned int i) {
     return amplitude.getValue(b, c) * v + target.getValue(b, c);
 }
 
-unsigned int ProcessDataWobble::getBankColors(BankColorValues &values, unsigned int stepsAhead) {
+unsigned int ProcessDataWobble::getBankColors(BankColorValues &values, unsigned int stepsAhead) const {
     if(ProcessData::getBankColors(values, stepsAhead) == 0) {
         return 0;
     }
