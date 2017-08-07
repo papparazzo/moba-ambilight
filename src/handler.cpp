@@ -29,20 +29,87 @@
 
 #include <moba/log.h>
 #include <moba/ringbuffer.h>
+#include <moba/atomic.h>
 
 #include <wiringPi.h>
 #include <string.h>
 #include <sys/time.h>
+#include <pthread.h>
+
+
+/*
+ /*
+ *  Project:    moba-common
+ *
+ *  Copyright (C) 2016 Stefan Paproth <pappi-@gmx.de>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.
+ *
+ */
+
+#pragma once
+
+#include <pthread.h>
+
+namespace {
+    pthread_t th;
+    pthread_mutex_t mutex;
+
+    moba::Atomic<bool> running = true;
+    moba::Atomic<bool> emergency = false;
+
+    moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
+
+    void *taskrunner_(void *) {
+        boost::shared_ptr<ProcessData> next;
+
+        do {
+            pthread_mutex_lock(&mutex);
+            next = regularBuffer.pop();
+            pthread_mutex_unlock(&mutex);
+
+            int interruption = next->getInterruptionTime();
+            do {
+                delayMicroseconds(interruption);
+                if(emergency) {
+                    continue;
+                }
+
+                if(!next->hasNext(true/*!interuptMode*/)) {
+                    break;
+                }
+            } while(running);
+        } while(running);
+    }
+}
 
 Handler::Handler(
     boost::shared_ptr<Bridge> bridge,
     boost::shared_ptr<moba::IPC> ipc,
     boost::shared_ptr<moba::SignalHandler> sigTerm
-) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), emergency(false), interuptMode(false) {
+) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), interuptMode(false) {
     duration = DEFAULT_DURATION;
+    pthread_mutex_init(&mutex, NULL);
+    pthread_create(&th, NULL, taskrunner_, NULL);
+}
+
+Handler::~Handler() {
+    pthread_mutex_destroy(&mutex);
 }
 
 void Handler::run() {
+
     do {
         fetchNextMsg();
 
@@ -50,23 +117,6 @@ void Handler::run() {
             usleep(50000);
             continue;
         }
-
-        boost::shared_ptr<ProcessData> next = regularBuffer.pop();
-        int interruption = next->getInterruptionTime();
-        int i = 0;
-        do {
-            if(!(++i % 1000)) {
-                fetchNextMsg();
-            }
-            delayMicroseconds(interruption);
-            if(emergency) {
-                continue;
-            }
-
-            if(!next->hasNext(!interuptMode)) {
-                break;
-            }
-        } while(true);
     } while(true);
 }
 
@@ -75,6 +125,8 @@ void Handler::fetchNextMsg() {
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
+            running = false;
+            pthread_join(th, NULL);
             throw HandlerException("sig-term caught");
         }
 
@@ -213,7 +265,9 @@ void Handler::reset(const std::string &data) {
     }
     currentValues.setAll(values);
     bridge->setPWMlg(values);
+    pthread_mutex_lock(&mutex);
     regularBuffer.reset();
+    pthread_mutex_unlock(&mutex);
     emergency = false;
 }
 
@@ -246,7 +300,7 @@ void Handler::insertNext(const std::string &data) {
                 break;
 
             case 4:
-                if(found != std::string::npos) { // FIXME: 
+                if(found != std::string::npos) { // FIXME:
                     durationOverride = atoi(data.substr(pos, found - pos).c_str());
                 }
                 break;
@@ -255,7 +309,9 @@ void Handler::insertNext(const std::string &data) {
     }
     boost::shared_ptr<ProcessData> item(new ProcessDataPlain(bridge, currentValues, values, durationOverride));
 
+    pthread_mutex_lock(&mutex);
     currentValues.setAll(values);
+    pthread_mutex_unlock(&mutex);
     regularBuffer.push(item);
 }
 

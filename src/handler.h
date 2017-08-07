@@ -63,6 +63,8 @@ class Handler : private boost::noncopyable {
             boost::shared_ptr<moba::SignalHandler> sigTerm
         );
 
+        virtual ~Handler();
+
         void run();
 
     protected:
@@ -84,11 +86,9 @@ class Handler : private boost::noncopyable {
         void releaseEmergencyStop();
 
     private:
-        bool emergency;
         bool interuptMode;
         int duration;
 
-        moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
         BankColorValues currentValues;
         BankColorValues interuptValues;
 };
