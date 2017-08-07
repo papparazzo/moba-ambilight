@@ -55,7 +55,7 @@ void Handler::run() {
         int interruption = next->getInterruptionTime();
         int i = 0;
         do {
-            if(++i % 1000) {
+            if(!(++i % 1000)) {
                 fetchNextMsg();
             }
             delayMicroseconds(interruption);
