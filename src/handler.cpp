@@ -74,6 +74,12 @@ namespace {
 
         do {
             pthread_mutex_lock(&mutex);
+            if(!regularBuffer.hasItems()) {
+                pthread_mutex_unlock(&mutex);
+                usleep(50000);
+                continue;
+            }
+
             next = regularBuffer.pop();
             pthread_mutex_unlock(&mutex);
 
@@ -100,6 +106,11 @@ Handler::Handler(
     duration = DEFAULT_DURATION;
     pthread_mutex_init(&mutex, NULL);
     pthread_create(&th, NULL, taskrunner_, NULL);
+
+    struct sched_param param;
+    int policy = SCHED_FIFO;
+    param.sched_priority = 99;
+    pthread_setschedparam(th, policy, &param);
 }
 
 Handler::~Handler() {
