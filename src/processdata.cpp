@@ -26,7 +26,7 @@
 unsigned int ProcessData::objCounter = 0;
 
 ProcessData::ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
-bridge(bridge), current(start), target(end) {
+bridge(bridge), current(start), target(end), counter(0) {
     objNumber = objCounter++;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < BankColorValues::COLOR_COUNT; ++c) {
