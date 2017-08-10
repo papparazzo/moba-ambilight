@@ -47,6 +47,7 @@ namespace {
 
     void *taskrunner_(void *) {
         boost::shared_ptr<ProcessData> next;
+        struct timeval t1, t2;
 
         do {
             pthread_mutex_lock(&mutex);
@@ -59,17 +60,27 @@ namespace {
             next = regularBuffer.pop();
             pthread_mutex_unlock(&mutex);
 
-            int interruption = next->getInterruptionTime();
+            long long interruption = next->getInterruptionTime();
+            long long newinterruption = 0;
             do {
-                delayMicroseconds(interruption);
                 if(emergency) {
                     continue;
                 }
 
+                gettimeofday(&t1, NULL);
                 if(!next->hasNext(true/*!interuptMode*/)) {
                     break;
                 }
+                gettimeofday(&t2, NULL);
+                newinterruption = interruption - ((t2.tv_sec * 1000000) + t2.tv_usec) + ((t1.tv_sec * 1000000) + t1.tv_usec);
+
+                if(newinterruption < 50) {
+                    delayMicroseconds(50);
+                } else {
+                    delayMicroseconds(newinterruption);
+                }
             } while(running);
+            LOG(moba::DEBUG) << "<-- item #" << next->getObjectId() << " finished" << std::endl;
         } while(running);
     }
 }
