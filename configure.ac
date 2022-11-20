@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([MoBa-AmbiLight], [0.1], [pappi-@gmx.de])
+AC_INIT([MoBa-AmbiLight], [0.2.0-0000], [pappi-@gmx.de])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
@@ -22,9 +22,9 @@ AC_CHECK_HEADERS([sys/time.h])
 AC_CHECK_HEADER_STDBOOL
 
 # Checks for library functions.
-
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
 ])
+
 AC_OUTPUT
