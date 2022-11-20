@@ -27,26 +27,28 @@
 #include "processdataplain.h"
 #include "processdatawobble.h"
 
-#include <moba/log.h>
-#include <moba/ringbuffer.h>
-#include <moba/atomic.h>
+#include <moba-common/log.h>
+#include <moba-common/ringbuffer.h>
+#include <moba-common/atomic.h>
 
 #include <wiringPi.h>
 #include <string.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include <atomic>
+#include <memory>
 
 namespace {
     pthread_t th;
     pthread_mutex_t mutex;
 
-    moba::Atomic<bool> running = true;
-    moba::Atomic<bool> emergency = false;
+    std::atomic<bool> running{true};
+    std::atomic<bool> emergency{false};
 
-    moba::Ringbuffer<boost::shared_ptr<ProcessData> > regularBuffer;
+    moba::common::Ringbuffer<std::shared_ptr<ProcessData> > regularBuffer;
 
     void *taskrunner_(void *) {
-        boost::shared_ptr<ProcessData> next;
+        std::shared_ptr<ProcessData> next;
         struct timeval t1, t2;
 
         do {
@@ -80,15 +82,16 @@ namespace {
                     delayMicroseconds(newinterruption);
                 }
             } while(running);
-            LOG(moba::DEBUG) << "<-- item #" << next->getObjectId() << " finished" << std::endl;
+            LOG(moba::common::LogLevel::DEBUG) << "<-- item #" << next->getObjectId() << " finished" << std::endl;
         } while(running);
+        return nullptr;
     }
 }
 
 Handler::Handler(
-    boost::shared_ptr<Bridge> bridge,
-    boost::shared_ptr<moba::IPC> ipc,
-    boost::shared_ptr<moba::SignalHandler> sigTerm
+    std::shared_ptr<Bridge> bridge,
+    std::shared_ptr<moba::common::IPC> ipc,
+    std::shared_ptr<moba::common::SignalHandler> sigTerm
 ) : ipc(ipc), bridge(bridge), sigTerm(sigTerm), interuptMode(false) {
     duration = DEFAULT_DURATION;
     pthread_mutex_init(&mutex, NULL);
@@ -117,7 +120,7 @@ void Handler::run() {
 }
 
 void Handler::fetchNextMsg() {
-    moba::IPC::Message msg;
+    moba::common::IPC::Message msg;
 
     while(true) {
         if(sigTerm->hasAnySignalTriggered()) {
@@ -135,10 +138,10 @@ void Handler::fetchNextMsg() {
         }
 
         switch(msg.mtype) {
-            case moba::IPC::CMD_EMERGENCY_STOP: {
-                LOG(moba::DEBUG) << "CMD_EMERGENCY_STOP..." << std::endl;
+            case moba::common::IPC::CMD_EMERGENCY_STOP: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_EMERGENCY_STOP..." << std::endl;
                 if(emergency) {
-                    LOG(moba::WARNING) << "emergency already set!" << std::endl;
+                    LOG(moba::common::LogLevel::WARNING) << "emergency already set!" << std::endl;
                     break;
                 }
                 runEmergencyMode(msg.mtext);
@@ -146,10 +149,10 @@ void Handler::fetchNextMsg() {
                 break;
             }
 
-            case moba::IPC::CMD_EMERGENCY_RELEASE: {
-                LOG(moba::DEBUG) << "CMD_EMERGENCY_RELEASE..." << std::endl;
+            case moba::common::IPC::CMD_EMERGENCY_RELEASE: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_EMERGENCY_RELEASE..." << std::endl;
                 if(!emergency) {
-                    LOG(moba::WARNING) << "emergency not set!" << std::endl;
+                    LOG(moba::common::LogLevel::WARNING) << "emergency not set!" << std::endl;
                     break;
                 }
                 releaseEmergencyStop();
@@ -157,53 +160,53 @@ void Handler::fetchNextMsg() {
                 break;
             }
 
-            case moba::IPC::CMD_TEST: {
-                LOG(moba::DEBUG) << "CMD_TEST..." << std::endl;
+            case moba::common::IPC::CMD_TEST: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_TEST..." << std::endl;
                 runTestMode();
-                LOG(moba::DEBUG) << "testing finished!" << std::endl;
+                LOG(moba::common::LogLevel::DEBUG) << "testing finished!" << std::endl;
                 return;
             }
 
-            case moba::IPC::CMD_RUN: {
-                LOG(moba::DEBUG) << "CMD_RUN..." << std::endl;
+            case moba::common::IPC::CMD_RUN: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_RUN..." << std::endl;
                 insertNext(msg.mtext);
                 break;
             }
 
-            case moba::IPC::CMD_RESET: {
-                LOG(moba::DEBUG) << "CMD_RESET..." << std::endl;
+            case moba::common::IPC::CMD_RESET: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_RESET..." << std::endl;
                 reset(msg.mtext);
                 break;
             }
 
-            case moba::IPC::CMD_TERMINATE: {
-                LOG(moba::DEBUG) << "CMD_TERMINATE..." << std::endl;
+            case moba::common::IPC::CMD_TERMINATE: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_TERMINATE..." << std::endl;
                 throw HandlerException("terminate received");
             }
 
-            case moba::IPC::CMD_INTERRUPT: {
-                LOG(moba::DEBUG) << "CMD_INTERRUPT..." << std::endl;
+            case moba::common::IPC::CMD_INTERRUPT: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_INTERRUPT..." << std::endl;
                // controller->setNewTarget(parseMessageData(msg.mtext), true);
                 break;
             }
 
-            case moba::IPC::CMD_RESUME: {
-                LOG(moba::DEBUG) << "CMD_RESUME..." << std::endl;
+            case moba::common::IPC::CMD_RESUME: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_RESUME..." << std::endl;
                 //controller->resume();
                 break;
             }
 
-            case moba::IPC::CMD_SET_DURATION: {
-                LOG(moba::DEBUG) << "CMD_SET_DURATION... " << std::endl;
+            case moba::common::IPC::CMD_SET_DURATION: {
+                LOG(moba::common::LogLevel::DEBUG) << "CMD_SET_DURATION... " << std::endl;
                 duration = atoi(msg.mtext);
-                LOG(moba::DEBUG) <<
+                LOG(moba::common::LogLevel::DEBUG) <<
                     "duration total: ~" << duration <<
                     " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
                 break;
             }
 
             default:
-                LOG(moba::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
+                LOG(moba::common::LogLevel::WARNING) << "ignoring unknown message-type <" << msg.mtype << ">" << std::endl;
                 break;
         }
         if(emergency) {
@@ -227,7 +230,7 @@ void Handler::runTestMode() {
     sleep(1);
     bridge->setPWMlg(BankColorValues::RED, 0);
     for(int b = 0; b < 4; ++b) {
-        LOG(moba::DEBUG) << "testing bank <" << b << ">" << std::endl;
+        LOG(moba::common::LogLevel::DEBUG) << "testing bank <" << b << ">" << std::endl;
         for(int j = 0; j < 4; ++j) {
             for(int k = 0; k < 2; ++k) {
                 bridge->setData(bcolor[j], b, 0, 150);
@@ -268,9 +271,9 @@ void Handler::reset(const std::string &data) {
 }
 
 void Handler::insertNext(const std::string &data) {
-    LOG(moba::DEBUG) << "data: <" << data << ">" << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "data: <" << data << ">" << std::endl;
     if(data == "") {
-        LOG(moba::WARNING) << "no values given!" << std::endl;
+        LOG(moba::common::LogLevel::WARNING) << "no values given!" << std::endl;
         return;
     }
 
@@ -303,7 +306,7 @@ void Handler::insertNext(const std::string &data) {
         }
         pos = found + 1;
     }
-    boost::shared_ptr<ProcessData> item(new ProcessDataPlain(bridge, currentValues, values, durationOverride));
+    std::shared_ptr<ProcessData> item(new ProcessDataPlain(bridge, currentValues, values, durationOverride));
 
     pthread_mutex_lock(&mutex);
     currentValues.setAll(values);

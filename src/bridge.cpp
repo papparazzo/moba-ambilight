@@ -24,7 +24,7 @@
 #include <wiringPiI2C.h>
 
 #include <unistd.h>
-#include <moba/helper.h>
+#include <moba-common/helper.h>
 
 #include "bridge.h"
 
@@ -159,7 +159,7 @@ namespace {
 Bridge::Bridge(int address) {
     fd = wiringPiI2CSetup(address);
     if(fd == -1) {
-        throw BridgeException(moba::getErrno("wiringPiI2CSetup"));
+        throw BridgeException(moba::common::getErrno("wiringPiI2CSetup"));
     }
     setAllOff();
 
@@ -179,16 +179,16 @@ Bridge::~Bridge() {
 void Bridge::softwareReset() {
     int fd = wiringPiI2CSetup(0x00);
     if(fd == -1) {
-        throw BridgeException(moba::getErrno("wiringPiI2CSetup"));
+        throw BridgeException(moba::common::getErrno("wiringPiI2CSetup"));
     }
 
     // Sends a software reset (SWRST) command to all the drivers on the bus
     if(wiringPiI2CWrite(fd, 0x06) == -1) {
-        throw BridgeException(moba::getErrno("wiringPiI2CWrite"));
+        throw BridgeException(moba::common::getErrno("wiringPiI2CWrite"));
     }
 
     if(close(fd) == -1) {
-        throw BridgeException(moba::getErrno("close"));
+        throw BridgeException(moba::common::getErrno("close"));
     }
 }
 

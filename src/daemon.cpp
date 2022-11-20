@@ -21,21 +21,20 @@
  */
 
 #include <cstdlib>
-#include <boost/shared_ptr.hpp>
 #include <getopt.h>
+#include <memory>
 
 #include "bridge.h"
 #include "handler.h"
 
-
-#include <moba/ipc.h>
-#include <moba/log.h>
-#include <moba/helper.h>
-#include <moba/signalhandler.h>
+#include <moba-common/ipc.h>
+#include <moba-common/log.h>
+#include <moba-common/helper.h>
+#include <moba-common/signalhandler.h>
 
 int main(int argc, char** argv) {
     int freq = 120;
-    int key  = moba::IPC::DEFAULT_KEY;
+    int key  = moba::common::IPC::DEFAULT_KEY;
 
     switch(argc) {
         case 3:
@@ -45,19 +44,19 @@ int main(int argc, char** argv) {
             key = atoi(argv[1]);
     }
 
-    LOG(moba::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
-    LOG(moba::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "Using key <" << key << "> for msg-queue" << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "Setting PWM frequency to <" << freq << "> Hz" << std::endl;
 
-    moba::setCoreFileSizeToULimit();
+    moba::common::setCoreFileSizeToULimit();
 
     if(geteuid() != 0) {
-        LOG(moba::ERROR) << "This daemon can only be run by root user, exiting" << std::endl;
+        LOG(moba::common::LogLevel::ERROR) << "This daemon can only be run by root user, exiting" << std::endl;
 	    exit(EXIT_FAILURE);
 	}
 
-    boost::shared_ptr<Bridge> bridge(new Bridge());
-    boost::shared_ptr<moba::IPC> ipc(new moba::IPC(key, moba::IPC::TYPE_SERVER));
-    boost::shared_ptr<moba::SignalHandler> sigTerm(new moba::SignalHandler());
+    std::shared_ptr<Bridge> bridge(new Bridge());
+    std::shared_ptr<moba::common::IPC> ipc(new moba::common::IPC(key, moba::common::IPC::TYPE_SERVER));
+    std::shared_ptr<moba::common::SignalHandler> sigTerm(new moba::common::SignalHandler());
     sigTerm->observeSignal(SIGTERM);
     sigTerm->observeSignal(SIGINT);
 
@@ -67,7 +66,7 @@ int main(int argc, char** argv) {
     try {
         handler.run();
     } catch(std::exception &e) {
-        LOG(moba::WARNING) << e.what() << std::endl;
+        std::cout << e.what() << std::endl;
     }
     bridge->setAllOff();
     return EXIT_SUCCESS;

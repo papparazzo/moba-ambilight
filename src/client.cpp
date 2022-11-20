@@ -23,18 +23,18 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <exception>
+#include <iostream>
 
 #include <config.h>
 
-#include <moba/ipc.h>
-#include <moba/log.h>
-#include <moba/helper.h>
-#include <moba/signalhandler.h>
+#include <moba-common/ipc.h>
+#include <moba-common/helper.h>
+#include <moba-common/signalhandler.h>
 
 namespace {
-    moba::AppData appData = {
+    moba::common::AppData appData = {
         PACKAGE_NAME,
-        moba::Version(PACKAGE_VERSION),
+        moba::common::Version{PACKAGE_VERSION},
         __DATE__,
         __TIME__,
         "",
@@ -43,7 +43,7 @@ namespace {
 
     struct CmdLineArguments {
         int key;
-        moba::IPC::Command action;
+        moba::common::IPC::Command action;
         std::string data;
     };
 }
@@ -75,7 +75,7 @@ void printHelp() {
         "[EMERGENCY_STOP] | [EMERGENCY_RELEASE] | [TEST] | [RUN] | " <<
         "[HALT] | [CONTINUE] | [RESET] | [TERMINATE] | [INTERRUPT] | " <<
         "[RESUME] | [SET_DURATION]" << std::endl;
-    std::cout << "-k, --key       ipc communication-key (default: " << moba::IPC::DEFAULT_KEY << ")" << std::endl;
+    std::cout << "-k, --key       ipc communication-key (default: " << moba::common::IPC::DEFAULT_KEY << ")" << std::endl;
     std::cout << "-d, --data      [white];[green];[blue];[red];[wobble{W}]" << std::endl;
     std::cout << "-h, --help      shows this help" << std::endl;
     std::cout << "-v, --version   shows version-info" << std::endl;
@@ -123,7 +123,7 @@ bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
                 break;
 
             case 'a':
-                args.action = moba::IPC::getCMDFromString(optarg);
+                args.action = moba::common::IPC::getCMDFromString(optarg);
                 break;
 
             case 'h':
@@ -131,7 +131,7 @@ bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
                 return true;
 
             case 'v':
-                moba::printAppData(appData);
+                moba::common::printAppData(appData);
                 return true;
         }
     }
@@ -140,8 +140,8 @@ bool parseArguments(int argc, char** argv, CmdLineArguments &args) {
 
 int main(int argc, char** argv) {
     CmdLineArguments args = {
-        moba::IPC::DEFAULT_KEY,
-        moba::IPC::CMD_RUN,
+        moba::common::IPC::DEFAULT_KEY,
+        moba::common::IPC::CMD_RUN,
         ""
     };
 
@@ -149,11 +149,11 @@ int main(int argc, char** argv) {
         if(parseArguments(argc, argv, args)) {
             return EXIT_SUCCESS;
         }
-        moba::IPC ipc(args.key, moba::IPC::TYPE_CLIENT);
-        std::cout << "sending <" <<  moba::IPC::getCMDAsString(args.action) << "> with <" << args.data << "> to " << args.key << std::endl;
+        moba::common::IPC ipc(args.key, moba::common::IPC::TYPE_CLIENT);
+        std::cout << "sending <" <<  moba::common::IPC::getCMDAsString(args.action) << "> with <" << args.data << "> to " << args.key << std::endl;
         ipc.send(args.data, args.action);
     } catch(std::exception &e) {
-        LOG(moba::WARNING) << e.what() << std::endl;
+        std::cout << e.what() << std::endl;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

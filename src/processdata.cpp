@@ -21,11 +21,11 @@
  */
 
 #include "processdata.h"
-#include <moba/log.h>
+#include <moba-common/log.h>
 
 unsigned int ProcessData::objCounter = 0;
 
-ProcessData::ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
+ProcessData::ProcessData(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
 bridge(bridge), current(start), target(end), counter(0) {
     objNumber = objCounter++;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
@@ -39,9 +39,9 @@ bridge(bridge), current(start), target(end), counter(0) {
         }
     }
 
-    LOG(moba::DEBUG) << "--> item #" << objNumber << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "--> item #" << objNumber << std::endl;
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
-        LOG(moba::DEBUG) <<
+        LOG(moba::common::LogLevel::DEBUG) <<
             "target of bank ["  << b << "] " <<
             " white: " << target.getValue(b, BankColorValues::WHITE) <<
             " green: " << target.getValue(b, BankColorValues::GREEN) <<
@@ -103,10 +103,10 @@ unsigned int ProcessData::getBankColors(BankColorValues &values, unsigned int st
 }
 
 void ProcessData::setInterruptionTime(unsigned int duration) {
-    LOG(moba::DEBUG) <<
+    LOG(moba::common::LogLevel::DEBUG) <<
         "duration total: ~" << duration <<
         " sec. (~" << (int)(duration / 60) << " min.)" << std::endl;
 
     interruptionTime = static_cast<int>((duration * 1000 * 1000) / ProcessData::TOTAL_STEPS_COUNT);
-    LOG(moba::DEBUG) << "interruption: ~" << interruptionTime << " µs." << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "interruption: ~" << interruptionTime << " µs." << std::endl;
 }

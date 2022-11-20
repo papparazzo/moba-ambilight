@@ -26,7 +26,7 @@
 
 class ProcessDataPlain : public ProcessData {
     public:
-        ProcessDataPlain(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
+        ProcessDataPlain(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
         virtual bool hasNext(bool setOutput);
 

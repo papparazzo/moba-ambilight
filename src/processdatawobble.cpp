@@ -23,13 +23,13 @@
 #include "processdatawobble.h"
 
 #include <cmath>
-#include <moba/log.h>
+#include <moba-common/log.h>
 
 namespace {
     const double PI = 3.1415926535897932384626433832795;
 }
 
-ProcessDataWobble::ProcessDataWobble(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur) :
+ProcessDataWobble::ProcessDataWobble(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur) :
 ProcessData(bridge, start, end, dur), amplitude(amp) {
     for(int b = 0; b < Bridge::BANK_COUNT; ++b) {
         for(int c = 0; c < 4; ++c) {
@@ -41,14 +41,14 @@ ProcessData(bridge, start, end, dur), amplitude(amp) {
                 throw ProcessDataException("amplitude and offset to low!");
             }
         }
-        LOG(moba::DEBUG) <<
+        LOG(moba::common::LogLevel::DEBUG) <<
             "amplitude of bank ["  << b << "] " <<
             " white: " << target.getValue(b, BankColorValues::WHITE) <<
             " green: " << target.getValue(b, BankColorValues::GREEN) <<
             " red: " << target.getValue(b, BankColorValues::RED) <<
             " blue: " << target.getValue(b, BankColorValues::BLUE) << std::endl;
     }
-    LOG(moba::DEBUG) << "type: [wobble] " << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "type: [wobble] " << std::endl;
 }
 
 bool ProcessDataWobble::hasNext(bool setOutput) {

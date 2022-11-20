@@ -23,18 +23,18 @@
 #pragma once
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <string>
 #include <exception>
+#include <memory>
 
 #include "bridge.h"
 #include "processdata.h"
 #include "bankcolorvalues.h"
 
-#include <moba/ipc.h>
-#include <moba/signalhandler.h>
-#include <moba/ringbuffer.h>
+#include <moba-common/ipc.h>
+#include <moba-common/signalhandler.h>
+#include <moba-common/ringbuffer.h>
 
 class HandlerException : public std::exception {
 
@@ -58,9 +58,9 @@ class HandlerException : public std::exception {
 class Handler : private boost::noncopyable {
     public:
         Handler(
-            boost::shared_ptr<Bridge> bridge,
-            boost::shared_ptr<moba::IPC> ipc,
-            boost::shared_ptr<moba::SignalHandler> sigTerm
+            std::shared_ptr<Bridge> bridge,
+            std::shared_ptr<moba::common::IPC> ipc,
+            std::shared_ptr<moba::common::SignalHandler> sigTerm
         );
 
         virtual ~Handler();
@@ -73,9 +73,9 @@ class Handler : private boost::noncopyable {
 
         static const int DEFAULT_DURATION     = 10;
 
-        boost::shared_ptr<Bridge> bridge;
-        boost::shared_ptr<moba::IPC> ipc;
-        boost::shared_ptr<moba::SignalHandler> sigTerm;
+        std::shared_ptr<Bridge> bridge;
+        std::shared_ptr<moba::common::IPC> ipc;
+        std::shared_ptr<moba::common::SignalHandler> sigTerm;
 
         void fetchNextMsg();
         void runTestMode();

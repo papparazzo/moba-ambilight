@@ -21,11 +21,11 @@
  */
 
 #include "processdataplain.h"
-#include <moba/log.h>
+#include <moba-common/log.h>
 
-ProcessDataPlain::ProcessDataPlain(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
+ProcessDataPlain::ProcessDataPlain(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur) :
 ProcessData(bridge, start, end, dur) {
-    LOG(moba::DEBUG) << "type: [plain] " << std::endl;
+    LOG(moba::common::LogLevel::DEBUG) << "type: [plain] " << std::endl;
 }
 
 bool ProcessDataPlain::hasNext(bool setOutput) {

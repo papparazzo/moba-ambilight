@@ -51,7 +51,7 @@ class ProcessData {
         static const int RANGE = Bridge::MAX_VALUE;
         static const int TOTAL_STEPS_COUNT = RANGE * 10;
 
-        ProcessData(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
+        ProcessData(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, unsigned int dur = 0);
 
         virtual ~ProcessData();
 
@@ -66,7 +66,7 @@ class ProcessData {
         BankColorValues current;
         BankColorValues target;
 
-        boost::shared_ptr<Bridge> bridge;
+        std::shared_ptr<Bridge> bridge;
 
         unsigned int counter;
 

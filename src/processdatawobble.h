@@ -26,7 +26,7 @@
 
 class ProcessDataWobble : public ProcessData {
     public:
-        ProcessDataWobble(boost::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur = 0);
+        ProcessDataWobble(std::shared_ptr<Bridge> bridge, const BankColorValues &start, const BankColorValues &end, const BankColorValues &amp, unsigned int dur = 0);
 
         virtual unsigned int getBankColors(BankColorValues &values, unsigned int stepsAhead = 1) const;
         virtual bool hasNext(bool setOutput);
