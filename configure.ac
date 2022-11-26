@@ -21,7 +21,8 @@ AC_CHECK_HEADERS([sys/time.h])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
 
-# Checks for library functions.
+AX_CXX_COMPILE_STDCXX_17()
+
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
